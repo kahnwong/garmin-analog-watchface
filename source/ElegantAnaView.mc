@@ -226,16 +226,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
     var clockTime = System.getClockTime();
     var targetDc = null;
 
-    if (
-      _isAwake &&
-      update_ran &&
-      !$.Settings_ran &&
-      clockTime.sec > 0 &&
-      !$.Options_Dict[aggressiveClear]
-    ) {
-      onPartialUpdate(dc);
-      return;
-    }
     update_ran = true;
 
     _fullScreenRefresh = true;
@@ -309,16 +299,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
         var radius = 2;
 
         var ln = width_screen * 0.48;
-        if (
-          ($.Options_Dict[secondHashes] &&
-            $.Options_Dict[secondDisplay] == 0) ||
-          $.Options_Dict[hourHashes]
-        ) {
-          ln = width_screen * 0.48;
-        }
-        if (width_screen > 176) {
-          ln = width_screen * 0.43;
-        }
         var ang_rad_clock = mod(dawnDusk_info[i][1], Math.PI * 2);
 
         var options = {
@@ -340,14 +320,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
     drawBackground(dc);
     _fullScreenRefresh = false;
-  }
-
-  public function onPartialUpdate(dc as Dc) as Void {
-    if (!_fullScreenRefresh) {
-      drawBackground(dc);
-    }
-
-    dc.setColor(sec_color, Gfx.COLOR_TRANSPARENT);
   }
 
   // ------------- functions -------------
@@ -419,10 +391,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       //TRIANGLE/pointer
 
       var mult = 1;
-      if ($.Options_Dict[secondDisplay] != 0) {
-        mult = 4;
-      }
-
       coords = [
         [-(width / 2) * mult, 0 + overheadLine],
         [0, -length],
@@ -641,16 +609,10 @@ class ElegantAnaView extends WatchUi.WatchFace {
     } else if (shape == 2 || shape == 5 || shape == 6) {
       //TRIANGLE/pointer
 
-      //var mult = 1;
-      //if (!$.Options_Dict["Long Second"]) {mult = 4;}
-
       coords = [
         [-(width / 2), overheadLine],
         [0, -length],
         [width / 2, overheadLine],
-        //[0, overheadLine],
-        //[0,overheadLine + 3],
-        //[0, overheadLine],
       ];
       count = 3;
     } else {
@@ -661,9 +623,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
         [-(width / 2), -length],
         [width / 2, -length],
         [width / 2, overheadLine],
-        //[0, overheadLine],
-        //[0,overheadLine + 3],
-        //[0, overheadLine],
       ];
       count = 4;
     }
@@ -1113,9 +1072,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
     var dateStr2 = Lang.format("$1$", [info.day]); // .format("%02d")
     var dateStr1 = Lang.format("$1$", [info.day_of_week]);
-    if ($.Options_Dict[showMonthDay]) {
-      dateStr1 = Lang.format("$1$", [info.month]);
-    }
 
     if (reverse) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
