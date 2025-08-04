@@ -866,7 +866,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
           var options = {
             :dc => dc,
             :angle => hashMarksArray[i][0],
-            :length => 90, // max_screen * 0.55,
+            :length => 88, // max_screen * 0.55,
             :width => 3.5 + width_adder,
             :overheadLine => hashMarksArray[i][1] + adder,
             :drawCircleOnTop => false,
