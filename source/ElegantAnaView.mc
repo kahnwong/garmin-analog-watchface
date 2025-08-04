@@ -221,6 +221,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var dawnDusk_ran = false;
   var dawnDusk_info = null;
   var dawnDusk_info24 = null;
+  var nextEventHand_ran = false;
+  var eventTime = null;
 
   public function onUpdate(dc as Dc) as Void {
     var clockTime = System.getClockTime();
@@ -760,6 +762,33 @@ class ElegantAnaView extends WatchUi.WatchFace {
     };
     drawHand(optionsAlternate);
 
+    // next event hand
+    if (!nextEventHand_ran || clock_min % 10 == 0) {
+      nextEventHand_ran = true;
+      eventTime = getNextEventTime();
+    }
+
+    if (eventTime != null) {
+      var hourMeeting = (eventTime.hour % 12) * 60 + eventTime.min;
+      hourMeeting = hourMeeting / (12 * 60.0);
+      hourMeeting = hourMeeting * Math.PI * 2;
+
+      var optionsEvent = {
+        :dc => dc,
+        :angle => hourMeeting,
+        :length => width_screen * 0.41 * 0.6,
+        :width => hr_width,
+        :overheadLine => 15,
+        :drawCircleOnTop => false,
+        :shape => 1, // has to be different from normal time hands
+        :squeezeX => false,
+        :squeezeY => false,
+        :centerX => centerX_main,
+        :centerY => centerY_main,
+      };
+      drawHand(optionsEvent);
+    }
+
     // Draw the minute
     min = (clock_min / 60.0) * Math.PI * 2;
     dc.setColor(min_color, Gfx.COLOR_TRANSPARENT);
@@ -1034,7 +1063,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     );
   }
 
-  private function getNextEvent() {
+  private function getNextEventString() {
     var nextEventTime = "";
 
     var myEventID = new Complications.Id(
@@ -1056,9 +1085,70 @@ class ElegantAnaView extends WatchUi.WatchFace {
       68,
       30,
       Gfx.FONT_SYSTEM_XTINY,
-      "N: " + getNextEvent(),
+      "N: " + getNextEventString(),
       Gfx.TEXT_JUSTIFY_CENTER
     );
+  }
+  private function getNextEventTime() {
+    var nextEventTime;
+
+    var myEventID = new Complications.Id(
+      Complications.COMPLICATION_TYPE_CALENDAR_EVENTS
+    );
+    var complication = Complications.getComplication(myEventID);
+
+    if (complication.value != null) {
+      var nextEventTimeStr = complication.value.toString();
+
+      // ----- extract hour and minute -----
+      var hour = 0;
+      var minute = 0;
+      var amPmIndicator = nextEventTimeStr
+        .substring(nextEventTimeStr.length() - 1, nextEventTimeStr.length())
+        .toLower(); // Get 'a' or 'p'
+
+      // Extract hour and minute strings
+      var hourStr = nextEventTimeStr.substring(0, nextEventTimeStr.find(":"));
+      var minuteStr = nextEventTimeStr.substring(
+        nextEventTimeStr.find(":") + 1,
+        nextEventTimeStr.length() - 1
+      );
+
+      hour = hourStr.toNumber();
+      minute = minuteStr.toNumber();
+
+      if (amPmIndicator.equals("a")) {
+        // 12 AM (midnight) becomes 00 in 24-hour format
+        if (hour == 12) {
+          hour = 0;
+        }
+      } else if (amPmIndicator.equals("p")) {
+        // For PM hours, add 12, unless it's 12 PM (noon)
+        if (hour != 12) {
+          hour += 12;
+        }
+      }
+
+      // ----- construct time object -----
+      var now = Time.now();
+      var nowInfo = Gregorian.utcInfo(now, Time.FORMAT_LONG);
+
+      var nextEventMomentOptions = {
+        :year => nowInfo.year,
+        :month => nowInfo.month,
+        :day => nowInfo.day,
+        :hour => hour,
+        :minute => minute,
+        :second => 0,
+      };
+
+      var nextEventMoment = Gregorian.moment(nextEventMomentOptions);
+      nextEventTime = Gregorian.utcInfo(nextEventMoment, Time.FORMAT_LONG);
+    } else {
+      nextEventTime = null; // No event or data not available
+    }
+
+    return nextEventTime;
   }
 
   function drawDateInset(dc, text_color, reverse) {
