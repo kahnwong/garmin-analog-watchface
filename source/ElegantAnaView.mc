@@ -1185,7 +1185,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
 
-    dc.drawRectangle(5, 82, 37, 28);
+    dc.drawRectangle(5, 82, 41, 28);
     dc.drawText(10, 95, f1, dateStr1, just1 | Gfx.TEXT_JUSTIFY_VCENTER);
 
     dc.drawRectangle(140, 82, 32.5, 28);
