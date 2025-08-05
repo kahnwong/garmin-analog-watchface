@@ -85,6 +85,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var moveBarLevel, moveExpired;
   var info, si;
   var hasSubscreen = true;
+  var iconsFont;
 
   //! Initialize variables for this view
   public function initialize() {
@@ -96,6 +97,9 @@ class ElegantAnaView extends WatchUi.WatchFace {
     _isAwake = true;
     si = new ElegantAna_SunInfo();
     readStorageValues();
+
+    // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
+    iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
   }
 
   public function onHide() as Void {}
@@ -1055,10 +1059,18 @@ class ElegantAnaView extends WatchUi.WatchFace {
       // height_screen * 0.5 - 35,
       // width_screen * 0.5 + 40,
       // height_screen * 0.5 + 25,
-      width_screen * 0.5,
+      width_screen * 0.5 - 10,
+      height_screen * 0.5 + 25,
+      iconsFont,
+      "p",
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
+
+    dc.drawText(
+      width_screen * 0.5 + 10,
       height_screen * 0.5 + 25,
       Gfx.FONT_SYSTEM_XTINY,
-      "HR: " + getHeartRate(),
+      getHeartRate(),
       Gfx.TEXT_JUSTIFY_CENTER
     );
   }
