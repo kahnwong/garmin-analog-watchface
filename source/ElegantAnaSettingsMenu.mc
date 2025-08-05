@@ -38,9 +38,9 @@ enum {
   //lastLoc_saved = 99,
 }
 
-//var infiniteSecondOptions=WatchUi.loadResource( $.Rez.JsonData.infiniteSecondOptions) as Array;
-var infiniteSecondLengths =
-  WatchUi.loadResource($.Rez.JsonData.infiniteSecondLengths) as Array;
+// //var infiniteSecondOptions=WatchUi.loadResource( $.Rez.JsonData.infiniteSecondOptions) as Array;
+// var infiniteSecondLengths =
+//   WatchUi.loadResource($.Rez.JsonData.infiniteSecondLengths) as Array;
 
 var infiniteSecondOptions;
 var secondDisplayOptions;

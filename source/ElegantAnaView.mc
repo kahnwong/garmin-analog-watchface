@@ -86,6 +86,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var info, si;
   var hasSubscreen = true;
   var iconsFont;
+  var iconsFontLarge;
 
   //! Initialize variables for this view
   public function initialize() {
@@ -100,6 +101,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
     // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
     iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
+    iconsFontLarge = Ui.loadResource(Rez.Fonts.IconsFontLarge);
   }
 
   public function onHide() as Void {}
@@ -953,6 +955,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
     );
   }
   function drawBodyBatteryInset(dc) {
+    var bbIcon = "o";
+
     // get value
     var bbValue = "--";
     try {
@@ -960,7 +964,14 @@ class ElegantAnaView extends WatchUi.WatchFace {
       if (bbIterator != null) {
         var sample = bbIterator.next();
         if (sample != null && sample.data != null) {
-          bbValue = sample.data.toNumber().toString();
+          var bbIntValue = sample.data.toNumber();
+          bbValue = bbIntValue.toString();
+
+          if (bbIntValue <= 5) {
+            bbIcon = "z";
+          } else if (bbIntValue < 30) {
+            bbIcon = "y";
+          }
         }
       }
     } catch (ex) {
@@ -976,26 +987,26 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // draw data
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
 
-    var f1 = Gfx.FONT_SYSTEM_NUMBER_MEDIUM;
-    var f2 = Gfx.FONT_SYSTEM_TINY;
+    var f1 = Gfx.FONT_GLANCE_NUMBER;
+    // var f2 = Gfx.FONT_SYSTEM_TINY;
 
     if (width_screen <= 176) {
       var ws = 0.82;
-      var hs1 = 0.0;
-      var hs2 = 0.21;
+      var hs1 = 0.02;
+      var hs2 = 0.16;
 
       dc.drawText(
         width_screen * ws,
         height_screen * hs1,
-        f1,
-        bbValue,
+        iconsFontLarge,
+        bbIcon,
         Gfx.TEXT_JUSTIFY_CENTER
       );
       dc.drawText(
         width_screen * ws,
         height_screen * hs2,
-        f2,
-        "BB",
+        f1,
+        bbValue,
         Gfx.TEXT_JUSTIFY_CENTER
       );
     }
