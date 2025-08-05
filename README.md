@@ -13,7 +13,7 @@ Added features:
 
 - Body battery on inset circle
 - Second hour hand for alternate time zone (alternating color for day/night)
-- Third hour hand for next calendar event (not pictured in screenshot)
+- Third hour hand for next calendar event
 - Next calendar event display
 - Heart rate display
 
