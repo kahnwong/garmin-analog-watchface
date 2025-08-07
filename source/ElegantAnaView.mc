@@ -229,6 +229,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var dawnDusk_info24 = null;
   var nextEventHand_ran = false;
   var eventTime = null;
+  var recoveryTimeLeft_ran = false;
+  var recoveryTime = null;
 
   public function onUpdate(dc as Dc) as Void {
     var clockTime = System.getClockTime();
@@ -264,10 +266,16 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // drawBodyBattery(targetDc, Gfx.COLOR_WHITE);
     drawHeartRate(targetDc, Gfx.COLOR_WHITE);
     drawNextEvent(targetDc, Gfx.COLOR_WHITE);
-    drawRecoveryTime(targetDc, Gfx.COLOR_WHITE);
     // drawDateInset(targetDc, Gfx.COLOR_WHITE, true);
     drawBodyBatteryInset(targetDc);
     drawDateMain(targetDc);
+
+    // recovery time
+    if (!recoveryTimeLeft_ran || clockTime.min % 10 == 0) {
+      recoveryTimeLeft_ran = true;
+      recoveryTime = getRecoveryTime();
+    }
+    drawRecoveryTime(targetDc, Gfx.COLOR_WHITE);
 
     var drawHashes = true;
     var drawHours = false;
@@ -1097,25 +1105,25 @@ class ElegantAnaView extends WatchUi.WatchFace {
     return null; // Return null if info is not available
   }
   function drawRecoveryTime(dc, text_color) {
-    var recoveryTime = getRecoveryTime();
+    if (recoveryTime != null) {
+      if (recoveryTime > 1) {
+        dc.setColor(text_color, Gfx.COLOR_BLACK);
+        dc.drawText(
+          width_screen * 0.5 - 10,
+          height_screen * 0.5 + 45,
+          iconsFont,
+          "x",
+          Gfx.TEXT_JUSTIFY_CENTER
+        );
 
-    if (recoveryTime > 1) {
-      dc.setColor(text_color, Gfx.COLOR_BLACK);
-      dc.drawText(
-        width_screen * 0.5 - 10,
-        height_screen * 0.5 + 45,
-        iconsFont,
-        "x",
-        Gfx.TEXT_JUSTIFY_CENTER
-      );
-
-      dc.drawText(
-        width_screen * 0.5 + 10,
-        height_screen * 0.5 + 45,
-        Gfx.FONT_SYSTEM_XTINY,
-        getRecoveryTime(),
-        Gfx.TEXT_JUSTIFY_CENTER
-      );
+        dc.drawText(
+          width_screen * 0.5 + 10,
+          height_screen * 0.5 + 45,
+          Gfx.FONT_SYSTEM_XTINY,
+          recoveryTime,
+          Gfx.TEXT_JUSTIFY_CENTER
+        );
+      }
     }
   }
 
