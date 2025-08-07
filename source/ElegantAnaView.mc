@@ -264,6 +264,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // drawBodyBattery(targetDc, Gfx.COLOR_WHITE);
     drawHeartRate(targetDc, Gfx.COLOR_WHITE);
     drawNextEvent(targetDc, Gfx.COLOR_WHITE);
+    drawRecoveryTime(targetDc, Gfx.COLOR_WHITE);
     // drawDateInset(targetDc, Gfx.COLOR_WHITE, true);
     drawBodyBatteryInset(targetDc);
     drawDateMain(targetDc);
@@ -1084,6 +1085,38 @@ class ElegantAnaView extends WatchUi.WatchFace {
       getHeartRate(),
       Gfx.TEXT_JUSTIFY_CENTER
     );
+  }
+
+  function getRecoveryTime() as Lang.Number? {
+    var info = ActivityMonitor.getInfo();
+    if (info != null) {
+      // timeToRecovery is in hours
+      var timeToRecovery = info.timeToRecovery;
+      return timeToRecovery;
+    }
+    return null; // Return null if info is not available
+  }
+  function drawRecoveryTime(dc, text_color) {
+    var recoveryTime = getRecoveryTime();
+
+    if (recoveryTime > 1) {
+      dc.setColor(text_color, Gfx.COLOR_BLACK);
+      dc.drawText(
+        width_screen * 0.5 - 10,
+        height_screen * 0.5 + 45,
+        iconsFont,
+        "x",
+        Gfx.TEXT_JUSTIFY_CENTER
+      );
+
+      dc.drawText(
+        width_screen * 0.5 + 10,
+        height_screen * 0.5 + 45,
+        Gfx.FONT_SYSTEM_XTINY,
+        getRecoveryTime(),
+        Gfx.TEXT_JUSTIFY_CENTER
+      );
+    }
   }
 
   private function getNextEventString() {

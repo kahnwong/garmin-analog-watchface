@@ -16,6 +16,7 @@ Added features:
 - Third hour hand for next calendar event
 - Next calendar event display
 - Heart rate display
+- (not pictured, below heart rate) recovery time left from last activity
 
 ## Screenshot
 
