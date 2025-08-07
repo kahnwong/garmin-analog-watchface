@@ -266,7 +266,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // drawBodyBattery(targetDc, Gfx.COLOR_WHITE);
     drawHeartRate(targetDc, Gfx.COLOR_WHITE);
     drawNextEvent(targetDc, Gfx.COLOR_WHITE);
-    drawStressScore(targetDc, Gfx.COLOR_WHITE);
+    // drawStressScore(targetDc, Gfx.COLOR_WHITE);
     // drawDateInset(targetDc, Gfx.COLOR_WHITE, true);
     drawBodyBatteryInset(targetDc);
     drawDateMain(targetDc);
