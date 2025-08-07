@@ -1080,16 +1080,16 @@ class ElegantAnaView extends WatchUi.WatchFace {
       // height_screen * 0.5 - 35,
       // width_screen * 0.5 + 40,
       // height_screen * 0.5 + 25,
-      width_screen * 0.5 - 55, // here
-      height_screen * 0.5 + 30, // here
+      width_screen * 0.5 - 10, // here
+      height_screen * 0.5 + 20, // here
       iconsFont,
       "p",
       Gfx.TEXT_JUSTIFY_CENTER
     );
 
     dc.drawText(
-      width_screen * 0.5 - 35, // here
-      height_screen * 0.5 + 30, // here
+      width_screen * 0.5 + 10, // here
+      height_screen * 0.5 + 20, // here
       Gfx.FONT_SYSTEM_XTINY,
       getHeartRate(),
       Gfx.TEXT_JUSTIFY_CENTER
@@ -1145,16 +1145,16 @@ class ElegantAnaView extends WatchUi.WatchFace {
       if (recoveryTime > 1) {
         dc.setColor(text_color, Gfx.COLOR_BLACK);
         dc.drawText(
-          width_screen * 0.5 + 35, // here
-          height_screen * 0.5 + 30, // here
+          width_screen * 0.5 - 10, // here
+          height_screen * 0.5 + 40, // here
           iconsFont,
           "t",
           Gfx.TEXT_JUSTIFY_CENTER
         );
 
         dc.drawText(
-          width_screen * 0.5 + 55, // here
-          height_screen * 0.5 + 30, // here
+          width_screen * 0.5 + 10, // here
+          height_screen * 0.5 + 40, // here
           Gfx.FONT_SYSTEM_XTINY,
           recoveryTime,
           Gfx.TEXT_JUSTIFY_CENTER

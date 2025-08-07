@@ -16,8 +16,8 @@ Added features:
 - Third hour hand for next calendar event
 - Next calendar event display
 - Heart rate display
-- (disabled) (not pictured, below heart rate) stress value
-- (not pictured, below stress value) recovery time left from last activity
+<!-- - (disabled) (not pictured, below heart rate) stress value -->
+- (not pictured, below heart rate) recovery time left from last activity
 
 ## Screenshot
 
