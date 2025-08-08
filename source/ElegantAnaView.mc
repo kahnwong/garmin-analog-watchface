@@ -1370,14 +1370,14 @@ class ElegantAnaView extends WatchUi.WatchFace {
     var dateStr1 = Lang.format("$1$", [info.day_of_week]);
 
     // var f1 = Gfx.FONT_SMALL;
-    var f2 = Gfx.FONT_SMALL;
+    // var f2 = Gfx.FONT_SMALL;
 
     // var just1 = Gfx.TEXT_JUSTIFY_LEFT;
-    var just2 = Gfx.TEXT_JUSTIFY_RIGHT;
+    // var just2 = Gfx.TEXT_JUSTIFY_RIGHT;
 
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
 
-    // -- date string - monospace font
+    // -- date string
     dc.drawRectangle(5, 82, 41, 28);
     // dc.drawText(10, 95, f1, dateStr1, just1 | Gfx.TEXT_JUSTIFY_VCENTER);
     var dateStrXOffset = 15;
@@ -1394,8 +1394,21 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
 
     // -- date number
-    dc.drawRectangle(140, 82, 32.5, 28);
-    dc.drawText(165, 95, f2, dateStr2, just2 | Gfx.TEXT_JUSTIFY_VCENTER);
+    dc.drawRectangle(140, 82, 30, 28);
+    // dc.drawText(165, 95, f2, dateStr2, just2 | Gfx.TEXT_JUSTIFY_VCENTER);
+
+    dateStrXOffset = 150;
+    for (var i = 0; i < dateStr2.length(); i++) {
+      var character = dateStr2.substring(i, i + 1);
+
+      dc.drawText(
+        dateStrXOffset + i * 10,
+        85,
+        monospaceFont,
+        character,
+        Gfx.TEXT_JUSTIFY_CENTER
+      );
+    }
   }
 
   function mod(x, y) {
