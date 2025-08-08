@@ -87,6 +87,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var hasSubscreen = true;
   var iconsFont;
   var iconsFontLarge;
+  var monospaceFont;
 
   //! Initialize variables for this view
   public function initialize() {
@@ -102,6 +103,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
     iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
     iconsFontLarge = Ui.loadResource(Rez.Fonts.IconsFontLarge);
+    monospaceFont = Ui.loadResource(Rez.Fonts.MonospaceFont);
   }
 
   public function onHide() as Void {}
@@ -1367,17 +1369,31 @@ class ElegantAnaView extends WatchUi.WatchFace {
     var dateStr2 = Lang.format("$1$", [info.day.format("%02d")]);
     var dateStr1 = Lang.format("$1$", [info.day_of_week]);
 
-    var f1 = Gfx.FONT_SMALL;
+    // var f1 = Gfx.FONT_SMALL;
     var f2 = Gfx.FONT_SMALL;
 
-    var just1 = Gfx.TEXT_JUSTIFY_LEFT;
+    // var just1 = Gfx.TEXT_JUSTIFY_LEFT;
     var just2 = Gfx.TEXT_JUSTIFY_RIGHT;
 
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
 
+    // -- date string - monospace font
     dc.drawRectangle(5, 82, 41, 28);
-    dc.drawText(10, 95, f1, dateStr1, just1 | Gfx.TEXT_JUSTIFY_VCENTER);
+    // dc.drawText(10, 95, f1, dateStr1, just1 | Gfx.TEXT_JUSTIFY_VCENTER);
+    var dateStrXOffset = 15;
+    for (var i = 0; i < dateStr1.length(); i++) {
+      var character = dateStr1.substring(i, i + 1);
 
+      dc.drawText(
+        dateStrXOffset + i * 10,
+        85,
+        monospaceFont,
+        character,
+        Gfx.TEXT_JUSTIFY_CENTER
+      );
+    }
+
+    // -- date number
     dc.drawRectangle(140, 82, 32.5, 28);
     dc.drawText(165, 95, f2, dateStr2, just2 | Gfx.TEXT_JUSTIFY_VCENTER);
   }
