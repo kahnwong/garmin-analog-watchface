@@ -1194,62 +1194,65 @@ class ElegantAnaView extends WatchUi.WatchFace {
   private function getNextEventTime() {
     var nextEventTime;
 
-    var myEventID = new Complications.Id(
-      Complications.COMPLICATION_TYPE_CALENDAR_EVENTS
-    );
-    var complication = Complications.getComplication(myEventID);
-
-    if (complication.value != null) {
-      var nextEventTimeStr = complication.value.toString();
-
-      // ----- extract hour and minute -----
-      var hour = 0;
-      var minute = 0;
-      var amPmIndicator = nextEventTimeStr
-        .substring(nextEventTimeStr.length() - 1, nextEventTimeStr.length())
-        .toLower(); // Get 'a' or 'p'
-
-      // Extract hour and minute strings
-      var hourStr = nextEventTimeStr.substring(0, nextEventTimeStr.find(":"));
-      var minuteStr = nextEventTimeStr.substring(
-        nextEventTimeStr.find(":") + 1,
-        nextEventTimeStr.length() - 1
+    try {
+      var myEventID = new Complications.Id(
+        Complications.COMPLICATION_TYPE_CALENDAR_EVENTS
       );
+      var complication = Complications.getComplication(myEventID);
 
-      hour = hourStr.toNumber();
-      minute = minuteStr.toNumber();
+      if (complication.value != null) {
+        var nextEventTimeStr = complication.value.toString();
 
-      if (amPmIndicator.equals("a")) {
-        // 12 AM (midnight) becomes 00 in 24-hour format
-        if (hour == 12) {
-          hour = 0;
+        // ----- extract hour and minute -----
+        var hour = 0;
+        var minute = 0;
+        var amPmIndicator = nextEventTimeStr
+          .substring(nextEventTimeStr.length() - 1, nextEventTimeStr.length())
+          .toLower(); // Get 'a' or 'p'
+
+        // Extract hour and minute strings
+        var hourStr = nextEventTimeStr.substring(0, nextEventTimeStr.find(":"));
+        var minuteStr = nextEventTimeStr.substring(
+          nextEventTimeStr.find(":") + 1,
+          nextEventTimeStr.length() - 1
+        );
+
+        hour = hourStr.toNumber();
+        minute = minuteStr.toNumber();
+
+        if (amPmIndicator.equals("a")) {
+          // 12 AM (midnight) becomes 00 in 24-hour format
+          if (hour == 12) {
+            hour = 0;
+          }
+        } else if (amPmIndicator.equals("p")) {
+          // For PM hours, add 12, unless it's 12 PM (noon)
+          if (hour != 12) {
+            hour += 12;
+          }
         }
-      } else if (amPmIndicator.equals("p")) {
-        // For PM hours, add 12, unless it's 12 PM (noon)
-        if (hour != 12) {
-          hour += 12;
-        }
+
+        // ----- construct time object -----
+        var now = Time.now();
+        var nowInfo = Gregorian.utcInfo(now, Time.FORMAT_LONG);
+
+        var nextEventMomentOptions = {
+          :year => nowInfo.year,
+          :month => nowInfo.month,
+          :day => nowInfo.day,
+          :hour => hour,
+          :minute => minute,
+          :second => 0,
+        };
+
+        var nextEventMoment = Gregorian.moment(nextEventMomentOptions);
+        nextEventTime = Gregorian.utcInfo(nextEventMoment, Time.FORMAT_LONG);
+      } else {
+        nextEventTime = null; // No event or data not available
       }
-
-      // ----- construct time object -----
-      var now = Time.now();
-      var nowInfo = Gregorian.utcInfo(now, Time.FORMAT_LONG);
-
-      var nextEventMomentOptions = {
-        :year => nowInfo.year,
-        :month => nowInfo.month,
-        :day => nowInfo.day,
-        :hour => hour,
-        :minute => minute,
-        :second => 0,
-      };
-
-      var nextEventMoment = Gregorian.moment(nextEventMomentOptions);
-      nextEventTime = Gregorian.utcInfo(nextEventMoment, Time.FORMAT_LONG);
-    } else {
-      nextEventTime = null; // No event or data not available
+    } catch (ex) {
+      nextEventTime = null;
     }
-
     return nextEventTime;
   }
 
