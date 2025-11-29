@@ -303,40 +303,40 @@ class ElegantAnaView extends WatchUi.WatchFace {
     targetDc.setColor(background_color, background_color);
     targetDc.drawCircle(width_screen / 2, height_screen / 2, 6);
 
-    // SUNSET/SUNRISE MARKERS
-    if (!dawnDusk_ran || clockTime.min % 10 == 0) {
-      dawnDusk_ran = true;
-      dawnDusk_info = si.getNextDawnDusk([SUNRISE, SUNSET]); // in simulator sunrise/sunset and dawn/dusk would display the same value
-    }
+    // // SUNSET/SUNRISE MARKERS
+    // if (!dawnDusk_ran || clockTime.min % 10 == 0) {
+    //   dawnDusk_ran = true;
+    //   dawnDusk_info = si.getNextDawnDusk([SUNRISE, SUNSET]); // in simulator sunrise/sunset and dawn/dusk would display the same value
+    // }
 
-    if (dawnDusk_info != null) {
-      for (var i = 0; i < dawnDusk_info.size(); i++) {
-        var sh = 7; //filled circle
-        if (dawnDusk_info[i][0].equals("Dusk")) {
-          sh = 9;
-        }
+    // if (dawnDusk_info != null) {
+    //   for (var i = 0; i < dawnDusk_info.size(); i++) {
+    //     var sh = 7; //filled circle
+    //     if (dawnDusk_info[i][0].equals("Dusk")) {
+    //       sh = 9;
+    //     }
 
-        var radius = 2;
+    //     var radius = 2;
 
-        var ln = width_screen * 0.48;
-        var ang_rad_clock = mod(dawnDusk_info[i][1], Math.PI * 2);
+    //     var ln = width_screen * 0.48;
+    //     var ang_rad_clock = mod(dawnDusk_info[i][1], Math.PI * 2);
 
-        var options = {
-          :dc => targetDc,
-          :angle => ang_rad_clock,
-          :length => ln,
-          :width => 8,
-          :overheadLine => radius,
-          :drawCircleOnTop => false,
-          :shape => sh,
-          :squeezeX => squeeze,
-          :squeezeY => squeeze,
-          :centerX => centerX_main,
-          :centerY => centerY_main,
-        };
-        drawHand(options);
-      }
-    }
+    //     var options = {
+    //       :dc => targetDc,
+    //       :angle => ang_rad_clock,
+    //       :length => ln,
+    //       :width => 8,
+    //       :overheadLine => radius,
+    //       :drawCircleOnTop => false,
+    //       :shape => sh,
+    //       :squeezeX => squeeze,
+    //       :squeezeY => squeeze,
+    //       :centerX => centerX_main,
+    //       :centerY => centerY_main,
+    //     };
+    //     drawHand(options);
+    //   }
+    // }
 
     drawBackground(dc);
     _fullScreenRefresh = false;

@@ -4,7 +4,8 @@ Modified from <https://github.com/bhugh/ElegantAnalog-Watchface/>
 
 Features from upstream that are enabled by default:
 
-- Sunrise/sunset time (as hour hashes)
+<!-- - Sunrise/sunset time (as hour hashes) -->
+
 - Date/day of week on `3` and `9` position with rectangle border
 - Hour hashes
 - Seconds hand is disabled
