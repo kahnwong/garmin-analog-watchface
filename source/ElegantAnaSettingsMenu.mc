@@ -236,6 +236,5 @@ class ElegantAnaSettingsMenuDelegate extends WatchUi.Menu2InputDelegate {
     secondHandOptions = null;
     dawnDuskOptions = null;
     WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
-    return false;
   }
 }
