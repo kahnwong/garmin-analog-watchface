@@ -1,0 +1,23 @@
+resources/fonts/pokemon.fnt
+  19be9cacc6a350ef 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "7e3c83fc8550772925d9ddba74668ebfd1f16296",
+  "prompts": {
+    "19be9cacc6a350ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "28732103-1ce1-41fc-9231-eafb634747e4",
+        "model": "claude-sonnet-4-5"
+      },
+      "human_author": "Karn Wong <karn@karnwong.me>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
