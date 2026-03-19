@@ -88,6 +88,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var iconsFont;
   var iconsFontLarge;
   var monospaceFont;
+  var pokemonFont;
 
   //! Initialize variables for this view
   public function initialize() {
@@ -104,6 +105,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
     iconsFontLarge = Ui.loadResource(Rez.Fonts.IconsFontLarge);
     monospaceFont = Ui.loadResource(Rez.Fonts.MonospaceFont);
+    pokemonFont = Ui.loadResource(Rez.Fonts.PokemonFont);
   }
 
   public function onHide() as Void {}
@@ -967,7 +969,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     );
   }
   function drawBodyBatteryInset(dc) {
-    var bbIcon = "o";
+    var bbIcon = 0; // o
 
     // get value
     var bbValue = "--";
@@ -980,9 +982,9 @@ class ElegantAnaView extends WatchUi.WatchFace {
           bbValue = bbIntValue.toString();
 
           if (bbIntValue <= 5) {
-            bbIcon = "z";
+            bbIcon = 2; // z
           } else if (bbIntValue < 30) {
-            bbIcon = "y";
+            bbIcon = 1; // y
           }
         }
       }
@@ -1010,7 +1012,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
       dc.drawText(
         width_screen * ws,
         height_screen * hs1,
-        iconsFontLarge,
+        pokemonFont, // iconsFontLarge
         bbIcon,
         Gfx.TEXT_JUSTIFY_CENTER
       );

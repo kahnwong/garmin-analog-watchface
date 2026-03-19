@@ -2,4 +2,5 @@
   <font id="IconsFont" filename="icons-25px.fnt" antialias="true" />
   <font id="IconsFontLarge" filename="icons-32px.fnt" antialias="true" />
   <font id="MonospaceFont" filename="date.fnt" antialias="true" />
+  <font id="PokemonFont" filename="pokemon.fnt" antialias="true" />
 </fonts>
