@@ -969,7 +969,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     );
   }
   function drawBodyBatteryInset(dc) {
-    var bbIcon = 0; // o
+    var bbIcon = "0"; // o
 
     // get value
     var bbValue = "--";
@@ -982,9 +982,9 @@ class ElegantAnaView extends WatchUi.WatchFace {
           bbValue = bbIntValue.toString();
 
           if (bbIntValue <= 5) {
-            bbIcon = 2; // z
+            bbIcon = "2"; // z
           } else if (bbIntValue < 30) {
-            bbIcon = 1; // y
+            bbIcon = "1"; // y
           }
         }
       }
