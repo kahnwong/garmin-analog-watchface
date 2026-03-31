@@ -983,7 +983,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
           if (bbIntValue <= 5) {
             bbIcon = "2"; // z
-          } else if (bbIntValue < 30) {
+          } else if (bbIntValue < 25) {
             bbIcon = "1"; // y
           }
         }
