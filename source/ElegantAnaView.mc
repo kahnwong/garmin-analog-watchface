@@ -981,10 +981,10 @@ class ElegantAnaView extends WatchUi.WatchFace {
           var bbIntValue = sample.data.toNumber();
           bbValue = bbIntValue.toString();
 
-          if (bbIntValue <= 5) {
-            bbIcon = "2"; // z
-          } else if (bbIntValue < 25) {
+          if (bbIntValue <= 50) {
             bbIcon = "1"; // y
+          } else if (bbIntValue <= 25) {
+            bbIcon = "2"; // z
           }
         }
       }
