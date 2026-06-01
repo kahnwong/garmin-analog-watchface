@@ -1204,6 +1204,11 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
       if (complication.value != null) {
         var nextEventTimeStr = complication.value.toString();
+        var colonIndex = nextEventTimeStr.find(":");
+
+        if (colonIndex == null || colonIndex < 1 || nextEventTimeStr.length() < colonIndex + 4) {
+          return null;
+        }
 
         // ----- extract hour and minute -----
         var hour = 0;
@@ -1213,14 +1218,18 @@ class ElegantAnaView extends WatchUi.WatchFace {
           .toLower(); // Get 'a' or 'p'
 
         // Extract hour and minute strings
-        var hourStr = nextEventTimeStr.substring(0, nextEventTimeStr.find(":"));
+        var hourStr = nextEventTimeStr.substring(0, colonIndex);
         var minuteStr = nextEventTimeStr.substring(
-          nextEventTimeStr.find(":") + 1,
+          colonIndex + 1,
           nextEventTimeStr.length() - 1
         );
 
         hour = hourStr.toNumber();
         minute = minuteStr.toNumber();
+
+        if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+          return null;
+        }
 
         if (amPmIndicator.equals("a")) {
           // 12 AM (midnight) becomes 00 in 24-hour format
