@@ -80,6 +80,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var iconsFontLarge;
   var monospaceFont;
   var pokemonFont;
+  var materialDesignFont;
 
   //! Initialize variables for this view
   public function initialize() {
@@ -90,6 +91,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     iconsFontLarge = Ui.loadResource(Rez.Fonts.IconsFontLarge);
     monospaceFont = Ui.loadResource(Rez.Fonts.MonospaceFont);
     pokemonFont = Ui.loadResource(Rez.Fonts.PokemonFont);
+    materialDesignFont = Ui.loadResource(Rez.Fonts.MaterialDesignFont);
   }
 
   public function onHide() as Void {}
@@ -1168,12 +1170,19 @@ class ElegantAnaView extends WatchUi.WatchFace {
   function drawNextEvent(dc, text_color) {
     dc.setColor(text_color, Gfx.COLOR_BLACK);
     dc.drawText(
-      68,
+      40,
       30,
-      Gfx.FONT_SYSTEM_XTINY,
-      "N: " + getNextEventString(),
+      materialDesignFont,
+      "c",
       Gfx.TEXT_JUSTIFY_CENTER
     );
+   dc.drawText(
+     77,
+     33,
+     Gfx.FONT_SYSTEM_XTINY,
+     getNextEventString(),
+     Gfx.TEXT_JUSTIFY_CENTER
+   );
   }
   private function getNextEventTime() {
     var nextEventTime;
