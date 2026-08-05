@@ -33,16 +33,8 @@ using Toybox.WatchUi as Ui;
 //! This implements an ElegantAna watch face
 //! Original design by Austen Harbour
 class ElegantAnaView extends WatchUi.WatchFace {
-  private var _font as FontResource?;
-  private var _isAwake as Boolean?;
-  private var _screenShape as ScreenShape;
-  private var _dndIcon as BitmapResource?;
   private var _offscreenBuffer as BufferedBitmap?;
   private var _hashMarksBuffer as BufferedBitmap?;
-  private var _screenCenterPoint as Array<Number>?;
-  private var _fullScreenRefresh as Boolean;
-  private var _hashMarksDrawn as Boolean;
-  private var _partialUpdatesAllowed as Boolean;
 
   var background_color = Gfx.COLOR_BLACK;
   var sec_color = Gfx.COLOR_WHITE;
@@ -84,7 +76,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
   var activeMinutesWeek, activeMinutesDay;
   var activeMinutesWeekGoal, activeMinutesDayGoal;
   var moveBarLevel, moveExpired;
-  var info, si;
   var hasSubscreen = true;
   var iconsFont;
   var iconsFontLarge;
@@ -94,12 +85,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
   //! Initialize variables for this view
   public function initialize() {
     WatchFace.initialize();
-    _screenShape = System.getDeviceSettings().screenShape;
-    _fullScreenRefresh = true;
-    _hashMarksDrawn = false;
-    _partialUpdatesAllowed = WatchUi.WatchFace has :onPartialUpdate;
-    _isAwake = true;
-    si = new ElegantAna_SunInfo();
     readStorageValues();
 
     // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
@@ -142,7 +127,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       _hashMarksBuffer = null;
     }
 
-    _screenCenterPoint = [dc.getWidth() / 2, dc.getHeight() / 2];
     width_screen = dc.getWidth();
     if (width_screen < 166) {
       width_screen -= 8;
@@ -243,8 +227,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
     update_ran = true;
 
-    _fullScreenRefresh = true;
-
     var squeeze = true;
     if (width_screen > 176) {
       squeeze = false;
@@ -330,7 +312,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
           :length => ln,
           :width => 8,
           :overheadLine => radius,
-          :drawCircleOnTop => false,
           :shape => sh,
           :squeezeX => squeeze,
           :squeezeY => squeeze,
@@ -342,7 +323,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
 
     drawBackground(dc);
-    _fullScreenRefresh = false;
   }
 
   // ------------- functions -------------
@@ -417,17 +397,12 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
   }
 
-  public function turnPartialUpdatesOff() as Void {
-    _partialUpdatesAllowed = false;
-  }
-
   function drawHand(options) {
     var dc = options[:dc];
     var angle = options[:angle];
     var length = options[:length];
     var width = options[:width];
     var overheadLine = options[:overheadLine];
-    var drawCircleOnTop = options[:drawCircleOnTop];
     var shape = options[:shape];
     var squeezeX = options[:squeezeX];
     var squeezeY = options[:squeezeY];
@@ -556,24 +531,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       //if (X<minX) {minX = X;}
       //if (X>maxX) {maxX = X;}
 
-      /*
-            if(drawCircleOnTop)
-            {
-                if(i == 0)
-                {
-                    var xCircle = ((coords[i][0]+(width/2)) * cos) - ((coords[i][1] + 1) * sin);
-                    var yCircle = ((coords[i][0]+(width/2)) * sin) + ((coords[i][1] + 1) * cos);
-                    dc.fillCircle(centerX + xCircle, centerY + yCircle, (width/2));
-                }
-                else if(i == 1)
-                {
-                    var xCircle = ((coords[i][0]+(width/2)) * cos) - ((coords[i][1] + 1) * sin);
-                    var yCircle = ((coords[i][0]+(width/2)) * sin) + ((coords[i][1] + 1) * cos);
-                    dc.fillCircle(centerX + xCircle, centerY + yCircle, (width/2));
-                }
-
-            }
-            */
     }
     //        dc.setClip(minX  -4 ,minY -4,maxX-minX + 8,maxY-minY + 8);
 
@@ -779,7 +736,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       :length => width_screen * 0.41 * 0.6,
       :width => hr_width,
       :overheadLine => 15,
-      :drawCircleOnTop => false,
       :shape => 0,
       :squeezeX => false,
       :squeezeY => false,
@@ -808,7 +764,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       :length => width_screen * 0.41 * 0.6,
       :width => hr_width,
       :overheadLine => 15,
-      :drawCircleOnTop => false,
       :shape => hourAltShape,
       :squeezeX => false,
       :squeezeY => false,
@@ -834,7 +789,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
         :length => width_screen * 0.41 * 0.6,
         :width => hr_width,
         :overheadLine => 15,
-        :drawCircleOnTop => false,
         :shape => 1, // has to be different from normal time hands
         :squeezeX => false,
         :squeezeY => false,
@@ -854,7 +808,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       :length => width_screen * 0.41,
       :width => min_width,
       :overheadLine => 15,
-      :drawCircleOnTop => false,
       :shape => 0,
       :squeezeX => false,
       :squeezeY => false,
@@ -953,7 +906,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
             :length => 88, // max_screen * 0.55,
             :width => 3.5 + width_adder,
             :overheadLine => hashMarksArray[i][1] + adder,
-            :drawCircleOnTop => false,
             :shape => 0,
             :squeezeX => squeeze,
             :squeezeY => squeeze,
@@ -1142,7 +1094,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       var stressScore = info.stressScore;
       return stressScore;
     }
-    return null; // Return null if info is not available
   }
   function drawStressScore(dc, text_color) {
     var stressScore = getStressScore();
@@ -1177,7 +1128,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       var timeToRecovery = info.timeToRecovery;
       return timeToRecovery;
     }
-    return null; // Return null if info is not available
   }
   function drawRecoveryTime(dc, text_color) {
     if (recoveryTime != null) {
@@ -1392,8 +1342,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       //LARGER SCREENS & AMOLED
 
       var f1_h = dc.getFontHeight(f1);
-      var f2_h = dc.getFontHeight(f2);
-
       dc.drawText(
         centerX_circle,
         centerY_circle + f1_h * 0.075 + 2,
@@ -1467,11 +1415,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
 }
 
 class ElegantAnaDelegate extends WatchUi.WatchFaceDelegate {
-  private var _view as ElegantAnaView;
-
   public function initialize(view as ElegantAnaView) {
     WatchFaceDelegate.initialize();
-    _view = view;
   }
 
   public function onPowerBudgetExceeded(
@@ -1479,7 +1424,6 @@ class ElegantAnaDelegate extends WatchUi.WatchFaceDelegate {
   ) as Void {
     System.println("Average execution time: " + powerInfo.executionTimeAverage);
     System.println("Allowed execution time: " + powerInfo.executionTimeLimit);
-    _view.turnPartialUpdatesOff();
   }
 
   public function onKey(keyEvent) {
