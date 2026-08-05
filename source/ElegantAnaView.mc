@@ -5,7 +5,6 @@
 //
 
 import Toybox.ActivityMonitor;
-import Toybox.Application.Storage;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
@@ -85,7 +84,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
   //! Initialize variables for this view
   public function initialize() {
     WatchFace.initialize();
-    readStorageValues();
 
     // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
     iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
@@ -98,7 +96,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
   public function onShow() as Void {
     update_ran = false;
-    $.Settings_ran = true;
   }
 
   public function onLayout(dc as Dc) as Void {
