@@ -10,6 +10,8 @@ class DialRenderer {
   private const SHAPE_TRIANGLE_OUTLINE = 5;
   private const SHAPE_CIRCLE_FILLED = 7;
   private const SHAPE_CIRCLE_BLANKED = 9;
+  private const HAND_TAIL_LENGTH = 0;
+  private const CENTER_CAP_RADIUS = 6;
 
   private var _width;
   private var _height;
@@ -57,7 +59,7 @@ class DialRenderer {
       getHourAngle(clockHour, clockMinute),
       _width * 0.41 * 0.6,
       hourWidth,
-      15,
+      HAND_TAIL_LENGTH,
       SHAPE_FILLED,
       false,
       false
@@ -72,7 +74,7 @@ class DialRenderer {
       getHourAngle(alternateTime.hour, clockMinute),
       _width * 0.41 * 0.6,
       hourWidth,
-      15,
+      HAND_TAIL_LENGTH,
       alternateShape,
       false,
       false
@@ -84,7 +86,7 @@ class DialRenderer {
         getHourAngle(eventTime.hour, eventTime.min),
         _width * 0.41 * 0.6,
         hourWidth,
-        15,
+        HAND_TAIL_LENGTH,
         SHAPE_LINE,
         false,
         false
@@ -96,7 +98,7 @@ class DialRenderer {
       (clockMinute / 60.0) * Math.PI * 2,
       _width * 0.41,
       minuteWidth,
-      15,
+      HAND_TAIL_LENGTH,
       SHAPE_FILLED,
       false,
       false
@@ -133,9 +135,9 @@ class DialRenderer {
     dc.setPenWidth(1);
     dc.setClip(0, _height / 2 - 20, _width, 40);
     dc.setColor(Gfx.COLOR_WHITE, backgroundColor);
-    dc.fillCircle(_width / 2, _height / 2, 6);
+    dc.fillCircle(_width / 2, _height / 2, CENTER_CAP_RADIUS);
     dc.setColor(backgroundColor, backgroundColor);
-    dc.drawCircle(_width / 2, _height / 2, 6);
+    dc.drawCircle(_width / 2, _height / 2, CENTER_CAP_RADIUS);
   }
 
   public function drawDawnDusk(dc, info, squeeze) as Void {
