@@ -2,6 +2,11 @@ import Toybox.Graphics;
 using Toybox.Graphics as Gfx;
 
 class WidgetRenderer {
+  private const DATE_OUTER_MARGIN = 5;
+  private const DATE_HORIZONTAL_PADDING = 5;
+  private const DATE_VERTICAL_PADDING = 2;
+  private const DATE_CENTER_Y_FACTOR = 0.545;
+
   private var _width;
   private var _height;
   private var _circleX;
@@ -87,10 +92,31 @@ class WidgetRenderer {
 
   public function drawDate(dc, dayOfWeek, dayOfMonth) as Void {
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
-    dc.drawRectangle(5, 82, 41, 28);
-    dc.drawRectangle(140, 82, 30, 28);
-    drawCharacterRow(dc, dayOfWeek, 15, 85);
-    drawCharacterRow(dc, dayOfMonth, 150, 85);
+
+    var boxHeight = dc.getFontHeight(_monospaceFont) +
+      DATE_VERTICAL_PADDING * 2;
+    var boxY = _height * DATE_CENTER_Y_FACTOR - boxHeight / 2;
+    var dayBoxWidth = dc.getTextWidthInPixels(dayOfWeek, _monospaceFont) +
+      DATE_HORIZONTAL_PADDING * 2;
+    var dateBoxWidth = dc.getTextWidthInPixels(dayOfMonth, _monospaceFont) +
+      DATE_HORIZONTAL_PADDING * 2;
+
+    drawBoxedText(
+      dc,
+      dayOfWeek,
+      DATE_OUTER_MARGIN,
+      boxY,
+      dayBoxWidth,
+      boxHeight
+    );
+    drawBoxedText(
+      dc,
+      dayOfMonth,
+      _width - DATE_OUTER_MARGIN - dateBoxWidth,
+      boxY,
+      dateBoxWidth,
+      boxHeight
+    );
   }
 
   private function drawMetricRow(dc, textColor, y, icon, value) as Void {
@@ -111,15 +137,14 @@ class WidgetRenderer {
     );
   }
 
-  private function drawCharacterRow(dc, text, x, y) as Void {
-    for (var i = 0; i < text.length(); i++) {
-      dc.drawText(
-        x + i * 10,
-        y,
-        _monospaceFont,
-        text.substring(i, i + 1),
-        Gfx.TEXT_JUSTIFY_CENTER
-      );
-    }
+  private function drawBoxedText(dc, text, x, y, width, height) as Void {
+    dc.drawRectangle(x, y, width, height);
+    dc.drawText(
+      x + width / 2,
+      y + DATE_VERTICAL_PADDING,
+      _monospaceFont,
+      text,
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
   }
 }
