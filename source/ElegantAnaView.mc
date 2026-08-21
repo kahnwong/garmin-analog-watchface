@@ -180,6 +180,11 @@ class ElegantAnaView extends WatchUi.WatchFace {
       Gfx.COLOR_WHITE,
       _data.getRecoveryTime()
     );
+    _dialRenderer.drawDawnDusk(
+      targetDc,
+      _data.getDawnDuskInfo(),
+      squeeze
+    );
     _dialRenderer.drawHands(
       targetDc,
       clockTime.hour,
@@ -188,11 +193,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
       _data.getNextEventTime()
     );
     _dialRenderer.drawCenter(targetDc, _backgroundColor);
-    _dialRenderer.drawDawnDusk(
-      targetDc,
-      _data.getDawnDuskInfo(),
-      squeeze
-    );
 
     presentFrame(dc);
   }
