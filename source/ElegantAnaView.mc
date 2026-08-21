@@ -34,6 +34,22 @@ using Toybox.WatchUi as Ui;
 class ElegantAnaView extends WatchUi.WatchFace {
   private var _offscreenBuffer as BufferedBitmap?;
   private var _hashMarksBuffer as BufferedBitmap?;
+  private var _screenShape;
+
+  private var _bodyBatteryRefreshMinute = null;
+  private var _bodyBatteryValue = "--";
+  private var _bodyBatteryIcon = "0";
+  private var _nextEventRefreshAt = 0;
+  private var _nextEventString = "";
+  private var _recoveryRefreshAt = 0;
+  private var _dawnDuskDay = null;
+  private var _dawnDuskRetryAt = 0;
+  private var _dateDay = null;
+  private var _dateDayOfWeek = "";
+  private var _dateDayOfMonth = "";
+  private var _dateDayOfMonthRaw = "";
+  private var _alternateRefreshMinute = null;
+  private var _alternateTime = null;
 
   var background_color = Gfx.COLOR_BLACK;
   var sec_color = Gfx.COLOR_WHITE;
@@ -85,6 +101,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
   //! Initialize variables for this view
   public function initialize() {
     WatchFace.initialize();
+
+    _screenShape = System.getDeviceSettings().screenShape;
 
     // ref: https://github.com/blotspot/garmin-watchface-protomolecule/blob/414e362605f3c7634a0e21617d1b61220d085877/source/datafield/DataFieldIcons.mc#L110
     iconsFont = Ui.loadResource(Rez.Fonts.IconsFont);
@@ -180,6 +198,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     timeTextHeight = dc.getFontHeight(timeFont);
 
     setLayout(Rez.Layouts.WatchFace(dc));
+    cacheHashMarks();
   }
 
   private function generateHandCoordinates(
@@ -212,16 +231,13 @@ class ElegantAnaView extends WatchUi.WatchFace {
   }
 
   var update_ran = false;
-  var dawnDusk_ran = false;
   var dawnDusk_info = null;
-  var dawnDusk_info24 = null;
-  var nextEventHand_ran = false;
   var eventTime = null;
-  var recoveryTimeLeft_ran = false;
   var recoveryTime = null;
 
   public function onUpdate(dc as Dc) as Void {
     var clockTime = System.getClockTime();
+    var nowValue = Time.now().value();
     var targetDc = null;
 
     update_ran = true;
@@ -239,15 +255,22 @@ class ElegantAnaView extends WatchUi.WatchFace {
       targetDc = dc;
     }
 
-    if (null != _hashMarksBuffer) {
-      targetDc.drawBitmap(0, 0, _hashMarksBuffer);
-    }
-
     // entrypoint
+    targetDc.clearClip();
     targetDc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
     targetDc.clear();
+    if (null != _hashMarksBuffer) {
+      targetDc.drawBitmap(0, 0, _hashMarksBuffer);
+    } else {
+      drawHashMarks(targetDc, true, false, true, squeeze);
+    }
     targetDc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_WHITE);
     targetDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+
+    refreshBodyBattery(nowValue);
+    refreshNextEvent(nowValue);
+    refreshRecoveryTime(nowValue);
+    refreshDawnDusk(nowValue);
 
     // drawBodyBattery(targetDc, Gfx.COLOR_WHITE);
     drawHeartRate(targetDc, Gfx.COLOR_WHITE);
@@ -257,17 +280,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     drawBodyBatteryInset(targetDc);
     drawDateMain(targetDc);
 
-    // recovery time
-    if (!recoveryTimeLeft_ran || clockTime.min % 10 == 0) {
-      recoveryTimeLeft_ran = true;
-      recoveryTime = getRecoveryTime();
-    }
     drawRecoveryTime(targetDc, Gfx.COLOR_WHITE);
-
-    var drawHashes = true;
-    var drawHours = false;
-    var avoidCircle = true;
-    drawHashMarks(targetDc, drawHashes, drawHours, avoidCircle, squeeze);
     drawHands(
       targetDc,
       clockTime.hour,
@@ -286,12 +299,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
     targetDc.fillCircle(width_screen / 2, height_screen / 2, 6);
     targetDc.setColor(background_color, background_color);
     targetDc.drawCircle(width_screen / 2, height_screen / 2, 6);
-
-    // SUNSET/SUNRISE MARKERS
-    if (!dawnDusk_ran || clockTime.min % 10 == 0) {
-      dawnDusk_ran = true;
-      dawnDusk_info = getWeatherSunriseSunsetInfo();
-    }
 
     if (dawnDusk_info != null) {
       for (var i = 0; i < dawnDusk_info.size(); i++) {
@@ -352,6 +359,27 @@ class ElegantAnaView extends WatchUi.WatchFace {
     return info.size() > 0 ? info : null;
   }
 
+  private function refreshDawnDusk(nowValue) as Void {
+    var todayValue = Time.today().value();
+    if (_dawnDuskDay == todayValue && dawnDusk_info != null) {
+      return;
+    }
+    if (_dawnDuskDay == todayValue && nowValue < _dawnDuskRetryAt) {
+      return;
+    }
+
+    _dawnDuskDay = todayValue;
+    try {
+      dawnDusk_info = getWeatherSunriseSunsetInfo();
+    } catch (ex) {
+      dawnDusk_info = null;
+    }
+
+    if (dawnDusk_info == null) {
+      _dawnDuskRetryAt = nowValue + 600;
+    }
+  }
+
   private function getClockAngleForMoment(moment) {
     return ((moment.value() - Time.today().value().toDouble()) /
       (Time.Gregorian.SECONDS_PER_DAY / 2.0)) *
@@ -394,6 +422,21 @@ class ElegantAnaView extends WatchUi.WatchFace {
     if (null != _offscreenBuffer) {
       dc.drawBitmap(0, 0, _offscreenBuffer);
     }
+  }
+
+  private function cacheHashMarks() as Void {
+    if (null == _hashMarksBuffer) {
+      return;
+    }
+
+    var hashDc = _hashMarksBuffer.getDc();
+    var squeeze = width_screen <= 176;
+    hashDc.clearClip();
+    hashDc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+    hashDc.clear();
+    hashDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+    drawHashMarks(hashDc, true, false, true, squeeze);
+    hashDc.clearClip();
   }
 
   function drawHand(options) {
@@ -771,12 +814,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
     };
     drawHand(optionsAlternate);
 
-    // next event hand
-    if (!nextEventHand_ran || clock_min % 10 == 0) {
-      nextEventHand_ran = true;
-      eventTime = getNextEventTime();
-    }
-
     if (eventTime != null) {
       var hourMeeting = (eventTime.hour % 12) * 60 + eventTime.min;
       hourMeeting = hourMeeting / (12 * 60.0);
@@ -863,14 +900,13 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
 
     if (drawHashes) {
-      var devset = System.getDeviceSettings();
       for (var i = 0; i < 12; i += 1) {
         if (
           (!drawHours || (i != 0 && i != 3 && i != 6 && i != 9)) &&
           (!avoidCircle || (i != 1 && i != 2))
         ) {
           if (
-            devset.screenShape == System.SCREEN_SHAPE_SEMI_OCTAGON &&
+            _screenShape == System.SCREEN_SHAPE_SEMI_OCTAGON &&
             i % 3 == 0
           ) {
             continue;
@@ -929,56 +965,49 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
     return null;
   }
-  function drawBodyBattery(dc, text_color) {
-    var bbValue = "--";
 
-    try {
-      var bbIterator = getBodyBatteryIterator();
-      if (bbIterator != null) {
-        var sample = bbIterator.next();
-        if (sample != null && sample.data != null) {
-          bbValue = sample.data.toNumber().toString();
-        }
-      }
-    } catch (ex) {
-      // Handle any exceptions gracefully
-      bbValue = "--";
+  private function refreshBodyBattery(nowValue) as Void {
+    var refreshMinute = Math.floor(nowValue / 60.0);
+    if (_bodyBatteryRefreshMinute == refreshMinute) {
+      return;
     }
-    dc.setColor(text_color, Gfx.COLOR_BLACK);
 
-    dc.drawText(
-      width_screen * 0.5 - 40,
-      height_screen * 0.5 + 25,
-      Gfx.FONT_SYSTEM_XTINY,
-      "BB: " + bbValue,
-      Gfx.TEXT_JUSTIFY_CENTER
-    );
-  }
-  function drawBodyBatteryInset(dc) {
-    var bbIcon = "0"; // o
+    _bodyBatteryRefreshMinute = refreshMinute;
+    _bodyBatteryValue = "--";
+    _bodyBatteryIcon = "0";
 
-    // get value
-    var bbValue = "--";
     try {
       var bbIterator = getBodyBatteryIterator();
       if (bbIterator != null) {
         var sample = bbIterator.next();
         if (sample != null && sample.data != null) {
           var bbIntValue = sample.data.toNumber();
-          bbValue = bbIntValue.toString();
+          _bodyBatteryValue = bbIntValue.toString();
 
-        if (bbIntValue <= 15) {
-          bbIcon = "2"; // z
-        } else if (bbIntValue <= 50) {
-          bbIcon = "1"; // y
-        }
+          if (bbIntValue <= 15) {
+            _bodyBatteryIcon = "2";
+          } else if (bbIntValue <= 50) {
+            _bodyBatteryIcon = "1";
+          }
         }
       }
     } catch (ex) {
-      // Handle any exceptions gracefully
-      bbValue = "--";
+      _bodyBatteryValue = "--";
     }
+  }
 
+  function drawBodyBattery(dc, text_color) {
+    dc.setColor(text_color, Gfx.COLOR_BLACK);
+
+    dc.drawText(
+      width_screen * 0.5 - 40,
+      height_screen * 0.5 + 25,
+      Gfx.FONT_SYSTEM_XTINY,
+      "BB: " + _bodyBatteryValue,
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
+  }
+  function drawBodyBatteryInset(dc) {
     // fill circle
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
     dc.fillCircle(centerX_circle, centerY_circle, radius_circle + 2);
@@ -999,14 +1028,14 @@ class ElegantAnaView extends WatchUi.WatchFace {
         width_screen * ws,
         height_screen * hs1,
         pokemonFont, // iconsFontLarge
-        bbIcon,
+        _bodyBatteryIcon,
         Gfx.TEXT_JUSTIFY_CENTER
       );
       dc.drawText(
         width_screen * ws,
         height_screen * hs2,
         f1,
-        bbValue,
+        _bodyBatteryValue,
         Gfx.TEXT_JUSTIFY_CENTER
       );
     }
@@ -1014,6 +1043,10 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
   private function getAlternateTimezone() {
     var utcMoment = Time.now();
+    var refreshMinute = Math.floor(utcMoment.value() / 60.0);
+    if (_alternateRefreshMinute == refreshMinute && _alternateTime != null) {
+      return _alternateTime;
+    }
 
     // Determine if DST is active (simplified check)
     var utcInfo = Gregorian.utcInfo(utcMoment, Time.FORMAT_SHORT);
@@ -1025,9 +1058,10 @@ class ElegantAnaView extends WatchUi.WatchFace {
     // Apply appropriate offset
     var offset = isDST ? -7 * 3600 : -8 * 3600; // PDT or PST
     var californiaMoment = utcMoment.add(new Time.Duration(offset));
-    var caTime = Gregorian.utcInfo(californiaMoment, Time.FORMAT_SHORT);
+    _alternateTime = Gregorian.utcInfo(californiaMoment, Time.FORMAT_SHORT);
+    _alternateRefreshMinute = refreshMinute;
 
-    return caTime;
+    return _alternateTime;
   }
 
   private function getHeartRate() {
@@ -1128,6 +1162,18 @@ class ElegantAnaView extends WatchUi.WatchFace {
       return timeToRecovery;
     }
   }
+  private function refreshRecoveryTime(nowValue) as Void {
+    if (nowValue < _recoveryRefreshAt) {
+      return;
+    }
+
+    try {
+      recoveryTime = getRecoveryTime();
+    } catch (ex) {
+      recoveryTime = null;
+    }
+    _recoveryRefreshAt = nowValue + (recoveryTime != null ? 3600 : 600);
+  }
   function drawRecoveryTime(dc, text_color) {
     if (recoveryTime != null) {
       if (recoveryTime > 1) {
@@ -1151,22 +1197,6 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
   }
 
-  private function getNextEventString() {
-    var nextEventTime = "";
-
-    var myEventID = new Complications.Id(
-      Complications.COMPLICATION_TYPE_CALENDAR_EVENTS
-    );
-    var complication = Complications.getComplication(myEventID);
-
-    if (complication.value != null) {
-      nextEventTime = complication.value as String;
-    } else {
-      nextEventTime = ""; // No event or data not available
-    }
-
-    return nextEventTime;
-  }
   function drawNextEvent(dc, text_color) {
     dc.setColor(text_color, Gfx.COLOR_BLACK);
     dc.drawText(
@@ -1180,13 +1210,18 @@ class ElegantAnaView extends WatchUi.WatchFace {
      77,
      33,
      Gfx.FONT_SYSTEM_XTINY,
-     getNextEventString(),
+     _nextEventString,
      Gfx.TEXT_JUSTIFY_CENTER
    );
   }
-  private function getNextEventTime() {
-    var nextEventTime;
+  private function refreshNextEvent(nowValue) as Void {
+    if (nowValue < _nextEventRefreshAt) {
+      return;
+    }
 
+    _nextEventRefreshAt = nowValue + 600;
+    _nextEventString = "";
+    eventTime = null;
     try {
       var myEventID = new Complications.Id(
         Complications.COMPLICATION_TYPE_CALENDAR_EVENTS
@@ -1195,10 +1230,11 @@ class ElegantAnaView extends WatchUi.WatchFace {
 
       if (complication.value != null) {
         var nextEventTimeStr = complication.value.toString();
+        _nextEventString = nextEventTimeStr;
         var colonIndex = nextEventTimeStr.find(":");
 
         if (colonIndex == null || colonIndex < 1 || nextEventTimeStr.length() < colonIndex + 4) {
-          return null;
+          return;
         }
 
         // ----- extract hour and minute -----
@@ -1219,7 +1255,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
         minute = minuteStr.toNumber();
 
         if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
-          return null;
+          return;
         }
 
         if (amPmIndicator.equals("a")) {
@@ -1248,27 +1284,38 @@ class ElegantAnaView extends WatchUi.WatchFace {
         };
 
         var nextEventMoment = Gregorian.moment(nextEventMomentOptions);
-        nextEventTime = Gregorian.utcInfo(nextEventMoment, Time.FORMAT_LONG);
-      } else {
-        nextEventTime = null; // No event or data not available
+        eventTime = Gregorian.utcInfo(nextEventMoment, Time.FORMAT_LONG);
       }
     } catch (ex) {
-      nextEventTime = null;
+      _nextEventString = "";
+      eventTime = null;
     }
-    return nextEventTime;
+  }
+
+  private function refreshDate() as Void {
+    var todayValue = Time.today().value();
+    if (_dateDay == todayValue) {
+      return;
+    }
+
+    var now = Time.now();
+    var info = Calendar.info(now, Time.FORMAT_LONG);
+    _dateDay = todayValue;
+    _dateDayOfWeek = Lang.format("$1$", [info.day_of_week]);
+    _dateDayOfMonth = Lang.format("$1$", [info.day.format("%02d")]);
+    _dateDayOfMonthRaw = Lang.format("$1$", [info.day]);
   }
 
   function drawDateInset(dc, text_color, reverse) {
-    var now = Time.now();
-    var info = Calendar.info(now, Time.FORMAT_LONG);
+    refreshDate();
     //var dateStr = Lang.format("$1$ $2$ $3$", [info.day_of_week, info.month, info.day]);
     //System.println("DATEDATEDATE");
 
     //dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
     //dc.drawRectangle(0,0,dc.getWidth(),dc.getHeight());
 
-    var dateStr2 = Lang.format("$1$", [info.day]); // .format("%02d")
-    var dateStr1 = Lang.format("$1$", [info.day_of_week]);
+    var dateStr2 = _dateDayOfMonthRaw;
+    var dateStr1 = _dateDayOfWeek;
 
     if (reverse) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -1366,11 +1413,9 @@ class ElegantAnaView extends WatchUi.WatchFace {
   }
 
   function drawDateMain(dc) {
-    var now = Time.now();
-    var info = Calendar.info(now, Time.FORMAT_LONG);
-
-    var dateStr2 = Lang.format("$1$", [info.day.format("%02d")]);
-    var dateStr1 = Lang.format("$1$", [info.day_of_week]);
+    refreshDate();
+    var dateStr2 = _dateDayOfMonth;
+    var dateStr1 = _dateDayOfWeek;
 
     // var f1 = Gfx.FONT_SMALL;
     // var f2 = Gfx.FONT_SMALL;
