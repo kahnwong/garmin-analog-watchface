@@ -10,6 +10,11 @@ using Toybox.Complications;
 using Toybox.Time.Gregorian as Calendar;
 
 class WatchFaceData {
+  private const PRESSURE_REFRESH_SECONDS = 600;
+  private const PRESSURE_HISTORY_SECONDS = 10800;
+  private const PRESSURE_MIN_SAMPLES = 10;
+  private const PRESSURE_MIN_HOURS = 2.0;
+
   private var _bodyBatteryRefreshMinute = null;
   private var _bodyBatteryValue = "--";
   private var _bodyBatteryIcon = "0";
@@ -26,6 +31,8 @@ class WatchFaceData {
   private var _dateDayOfMonth = "";
   private var _alternateRefreshMinute = null;
   private var _alternateTime = null;
+  private var _pressureRefreshAt = 0;
+  private var _pressureTrend = "--";
 
   public function initialize() {}
 
@@ -36,6 +43,7 @@ class WatchFaceData {
     refreshDawnDusk(nowValue);
     refreshDate();
     refreshAlternateTime(nowValue);
+    refreshPressureTrend(nowValue);
   }
 
   public function getBodyBatteryValue() {
@@ -72,6 +80,10 @@ class WatchFaceData {
 
   public function getAlternateTime() {
     return _alternateTime;
+  }
+
+  public function getPressureTrend() {
+    return _pressureTrend;
   }
 
   // Heart rate intentionally remains live rather than using a cache.
@@ -300,5 +312,74 @@ class WatchFaceData {
       Time.FORMAT_SHORT
     );
     _alternateRefreshMinute = refreshMinute;
+  }
+
+  private function refreshPressureTrend(nowValue) as Void {
+    if (nowValue < _pressureRefreshAt) {
+      return;
+    }
+
+    _pressureRefreshAt = nowValue + PRESSURE_REFRESH_SECONDS;
+    if (
+      !(Toybox has :SensorHistory) ||
+      !(Toybox.SensorHistory has :getPressureHistory)
+    ) {
+      return;
+    }
+
+    try {
+      var iterator = Toybox.SensorHistory.getPressureHistory({
+        :period => new Time.Duration(PRESSURE_HISTORY_SECONDS),
+        :order => Toybox.SensorHistory.ORDER_OLDEST_FIRST,
+      });
+      var firstTimestamp = null;
+      var spanHours = 0.0;
+      var count = 0;
+      var sumX = 0.0;
+      var sumY = 0.0;
+      var sumXX = 0.0;
+      var sumXY = 0.0;
+      var sample = iterator.next();
+
+      while (sample != null) {
+        if (sample.data != null) {
+          var timestamp = sample.when.value();
+          if (firstTimestamp == null) {
+            firstTimestamp = timestamp;
+          }
+
+          var hours = (timestamp - firstTimestamp) / 3600.0;
+          var pressure = sample.data / 100.0;
+          count += 1;
+          spanHours = hours;
+          sumX += hours;
+          sumY += pressure;
+          sumXX += hours * hours;
+          sumXY += hours * pressure;
+        }
+        sample = iterator.next();
+      }
+
+      if (count < PRESSURE_MIN_SAMPLES || spanHours < PRESSURE_MIN_HOURS) {
+        return;
+      }
+
+      var denominator = count * sumXX - sumX * sumX;
+      if (denominator.abs() < 0.0001) {
+        return;
+      }
+
+      var slope = (count * sumXY - sumX * sumY) / denominator;
+      var threeHourChange = slope * 3.0;
+      if (threeHourChange <= -2.0) {
+        _pressureTrend = "RN";
+      } else if (threeHourChange <= -0.5) {
+        _pressureTrend = "FL";
+      } else if (threeHourChange >= 0.5) {
+        _pressureTrend = "RS";
+      } else {
+        _pressureTrend = "ST";
+      }
+    } catch (ex) {}
   }
 }

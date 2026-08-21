@@ -119,6 +119,17 @@ class WidgetRenderer {
     );
   }
 
+  public function drawPressureTrend(dc, textColor, value) as Void {
+    dc.setColor(textColor, Gfx.COLOR_BLACK);
+    dc.drawText(
+      _width * 0.25,
+      _height * 0.70,
+      Gfx.FONT_SYSTEM_XTINY,
+      value,
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
+  }
+
   private function drawMetricRow(dc, textColor, y, icon, value) as Void {
     dc.setColor(textColor, Gfx.COLOR_BLACK);
     dc.drawText(
