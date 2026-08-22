@@ -124,7 +124,7 @@ class WidgetRenderer {
     dc.drawText(
       _width * 0.25,
       _height * 0.70,
-      Gfx.FONT_SYSTEM_XTINY,
+      _materialDesignFont,
       value,
       Gfx.TEXT_JUSTIFY_CENTER
     );

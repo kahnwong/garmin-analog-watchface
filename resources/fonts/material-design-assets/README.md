@@ -1,4 +1,13 @@
 # Material Design Assets
 
 - Requires `16px` image.
-- Map it to `c`
+
+## Mapping
+
+| Icon         | Symbol |
+|--------------|--------|
+| Calendar     | c      |
+| RN (Rain)    | n      |
+| FL (Falling) | f      |
+| ST (Steady)  | s      |
+| RS (Rising)  | r      |

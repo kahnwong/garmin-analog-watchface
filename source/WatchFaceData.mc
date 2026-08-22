@@ -372,13 +372,13 @@ class WatchFaceData {
       var slope = (count * sumXY - sumX * sumY) / denominator;
       var threeHourChange = slope * 3.0;
       if (threeHourChange <= -2.0) {
-        _pressureTrend = "RN";
+        _pressureTrend = "n";
       } else if (threeHourChange <= -0.5) {
-        _pressureTrend = "FL";
+        _pressureTrend = "f";
       } else if (threeHourChange >= 0.5) {
-        _pressureTrend = "RS";
+        _pressureTrend = "r";
       } else {
-        _pressureTrend = "ST";
+        _pressureTrend = "s";
       }
     } catch (ex) {}
   }
