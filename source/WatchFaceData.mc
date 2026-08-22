@@ -10,6 +10,10 @@ using Toybox.Complications;
 using Toybox.Time.Gregorian as Calendar;
 
 class WatchFaceData {
+  private const NEXT_EVENT_ACTIVE_REFRESH_SECONDS = 60;
+  private const NEXT_EVENT_REFRESH_SECONDS = 600;
+  private const NEXT_EVENT_WINDOW_SECONDS = 14400;
+  private const SECONDS_PER_DAY = 86400;
   private const PRESSURE_REFRESH_SECONDS = 600;
   private const PRESSURE_HISTORY_SECONDS = 10800;
   private const PRESSURE_MIN_SAMPLES = 10;
@@ -21,6 +25,7 @@ class WatchFaceData {
   private var _nextEventRefreshAt = 0;
   private var _nextEventString = "";
   private var _nextEventTime = null;
+  private var _nextEventRelativeTime = "";
   private var _recoveryRefreshAt = 0;
   private var _recoveryTime = null;
   private var _dawnDuskDay = null;
@@ -39,6 +44,7 @@ class WatchFaceData {
   public function refresh(nowValue) as Void {
     refreshBodyBattery(nowValue);
     refreshNextEvent(nowValue);
+    refreshNextEventRelativeTime(nowValue);
     refreshRecoveryTime(nowValue);
     refreshDawnDusk(nowValue);
     refreshDate();
@@ -60,6 +66,10 @@ class WatchFaceData {
 
   public function getNextEventTime() {
     return _nextEventTime;
+  }
+
+  public function getNextEventRelativeTime() {
+    return _nextEventRelativeTime;
   }
 
   public function getRecoveryTime() {
@@ -154,7 +164,8 @@ class WatchFaceData {
       return;
     }
 
-    _nextEventRefreshAt = nowValue + 600;
+    _nextEventRefreshAt = nowValue + NEXT_EVENT_REFRESH_SECONDS;
+    var previousEventString = _nextEventString;
     _nextEventString = "";
     _nextEventTime = null;
 
@@ -164,40 +175,98 @@ class WatchFaceData {
       );
       var complication = Complications.getComplication(eventId);
       if (complication.value != null) {
-        _nextEventString = complication.value.toString();
-        _nextEventTime = parseEventTime(_nextEventString);
+        _nextEventTime = parseEventTime(complication.value.toString());
+        if (_nextEventTime != null) {
+          _nextEventString = _nextEventTime.hour.format("%02d") + ":" +
+            _nextEventTime.min.format("%02d");
+        }
       }
     } catch (ex) {
       _nextEventString = "";
       _nextEventTime = null;
     }
+
+    if (!_nextEventString.equals(previousEventString)) {
+      _nextEventRelativeTime = "";
+    }
+  }
+
+  private function refreshNextEventRelativeTime(nowValue) as Void {
+    if (_nextEventTime == null) {
+      _nextEventRelativeTime = "";
+      return;
+    }
+
+    var nowInfo = Gregorian.info(Time.now(), Time.FORMAT_LONG);
+    var eventSeconds = _nextEventTime.hour * 3600 +
+      _nextEventTime.min * 60;
+    var nowSeconds = nowInfo.hour * 3600 + nowInfo.min * 60 + nowInfo.sec;
+    var secondsUntilEvent = eventSeconds - nowSeconds;
+
+    // A much earlier clock time represents an upcoming event after midnight.
+    if (secondsUntilEvent < -NEXT_EVENT_REFRESH_SECONDS) {
+      secondsUntilEvent += SECONDS_PER_DAY;
+    }
+
+    if (secondsUntilEvent > NEXT_EVENT_WINDOW_SECONDS) {
+      _nextEventRelativeTime = "";
+      return;
+    }
+
+    var roundedMinutes = Math.round(secondsUntilEvent / 60.0).toNumber();
+    if (roundedMinutes <= 0) {
+      _nextEventRelativeTime = "Now";
+      var activeRefreshAt = nowValue + NEXT_EVENT_ACTIVE_REFRESH_SECONDS;
+      if (_nextEventRefreshAt > activeRefreshAt) {
+        _nextEventRefreshAt = activeRefreshAt;
+      }
+      return;
+    }
+
+    if (roundedMinutes < 60) {
+      _nextEventRelativeTime = "+" + roundedMinutes.toString() + "M";
+      return;
+    }
+
+    var roundedHours = Math.round(secondsUntilEvent / 3600.0).toNumber();
+    _nextEventRelativeTime = "+" + roundedHours.toString() + "H";
   }
 
   private function parseEventTime(value) {
     var colonIndex = value.find(":");
-    if (colonIndex == null || colonIndex < 1 || value.length() < colonIndex + 4) {
+    var length = value.length();
+    if (colonIndex == null || colonIndex < 1 || colonIndex > 2) {
+      return null;
+    }
+
+    var suffix = value.substring(length - 1, length).toLower();
+    var hasMeridiem = suffix.equals("a") || suffix.equals("p");
+    var minuteEnd = hasMeridiem ? length - 1 : length;
+    if (minuteEnd - colonIndex - 1 != 2) {
       return null;
     }
 
     var hour = value.substring(0, colonIndex).toNumber();
     var minute = value
-      .substring(colonIndex + 1, value.length() - 1)
+      .substring(colonIndex + 1, minuteEnd)
       .toNumber();
-    if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+    if (minute < 0 || minute > 59) {
       return null;
     }
 
-    var amPm = value
-      .substring(value.length() - 1, value.length())
-      .toLower();
-    if (amPm.equals("a")) {
-      if (hour == 12) {
-        hour = 0;
+    if (hasMeridiem) {
+      if (hour < 1 || hour > 12) {
+        return null;
       }
-    } else if (amPm.equals("p")) {
-      if (hour != 12) {
+      if (suffix.equals("a")) {
+        if (hour == 12) {
+          hour = 0;
+        }
+      } else if (hour != 12) {
         hour += 12;
       }
+    } else if (hour < 0 || hour > 23) {
+      return null;
     }
 
     var nowInfo = Gregorian.utcInfo(Time.now(), Time.FORMAT_LONG);

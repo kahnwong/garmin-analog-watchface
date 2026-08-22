@@ -72,7 +72,7 @@ class WidgetRenderer {
     }
   }
 
-  public function drawNextEvent(dc, textColor, value) as Void {
+  public function drawNextEvent(dc, textColor, value, relativeValue) as Void {
     dc.setColor(textColor, Gfx.COLOR_BLACK);
     dc.drawText(
       40,
@@ -88,6 +88,17 @@ class WidgetRenderer {
       value,
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
+    if (!relativeValue.equals("")) {
+      var eventTextLeft = 74 -
+        dc.getTextWidthInPixels(value, Gfx.FONT_SYSTEM_XTINY) / 2;
+      dc.drawText(
+        eventTextLeft,
+        60,
+        Gfx.FONT_SYSTEM_XTINY,
+        relativeValue,
+        Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+      );
+    }
   }
 
   public function drawDate(dc, dayOfWeek, dayOfMonth) as Void {

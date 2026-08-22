@@ -163,7 +163,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
     _widgetRenderer.drawNextEvent(
       targetDc,
       Gfx.COLOR_WHITE,
-      _data.getNextEventString()
+      _data.getNextEventString(),
+      _data.getNextEventRelativeTime()
     );
     _widgetRenderer.drawBodyBattery(
       targetDc,
