@@ -76,17 +76,17 @@ class WidgetRenderer {
     dc.setColor(textColor, Gfx.COLOR_BLACK);
     dc.drawText(
       40,
-      30,
+      40,
       _materialDesignFont,
       "c",
-      Gfx.TEXT_JUSTIFY_CENTER
+      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
     dc.drawText(
-      77,
-      33,
+      74,
+      40,
       Gfx.FONT_SYSTEM_XTINY,
       value,
-      Gfx.TEXT_JUSTIFY_CENTER
+      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
   }
 
