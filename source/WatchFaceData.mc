@@ -138,7 +138,6 @@ class WatchFaceData {
 
     _bodyBatteryRefreshMinute = refreshMinute;
     _bodyBatteryValue = "--";
-    _bodyBatteryIcon = "0";
 
     try {
       var iterator = getBodyBatteryIterator();
@@ -151,6 +150,8 @@ class WatchFaceData {
             _bodyBatteryIcon = "2";
           } else if (value <= 50) {
             _bodyBatteryIcon = "1";
+          } else {
+            _bodyBatteryIcon = "0";
           }
         }
       }
