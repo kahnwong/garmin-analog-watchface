@@ -73,6 +73,10 @@ class WidgetRenderer {
   }
 
   public function drawNextEvent(dc, textColor, value, relativeValue) as Void {
+    if (value.equals("")) {
+      return;
+    }
+
     var iconX = _width * 0.25;
     var eventTextX = iconX + 30;
 
