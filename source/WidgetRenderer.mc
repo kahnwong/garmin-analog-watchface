@@ -73,23 +73,26 @@ class WidgetRenderer {
   }
 
   public function drawNextEvent(dc, textColor, value, relativeValue) as Void {
+    var iconX = _width * 0.25;
+    var eventTextX = iconX + 30;
+
     dc.setColor(textColor, Gfx.COLOR_BLACK);
     dc.drawText(
-      40,
-      40,
+      iconX,
+      39,
       _materialDesignFont,
       "c",
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
     dc.drawText(
-      74,
+      eventTextX,
       40,
       Gfx.FONT_SYSTEM_XTINY,
       value,
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
     if (!relativeValue.equals("")) {
-      var eventTextLeft = 74 -
+      var eventTextLeft = eventTextX -
         dc.getTextWidthInPixels(value, Gfx.FONT_SYSTEM_XTINY) / 2;
       dc.drawText(
         eventTextLeft,
