@@ -225,7 +225,10 @@ class WatchFaceData {
     }
 
     if (roundedMinutes < 60) {
-      _nextEventRelativeTime = "+" + roundedMinutes.toString() + "M";
+      var displayMinutes = roundedMinutes < 10
+        ? roundedMinutes
+        : Math.round(roundedMinutes / 10.0).toNumber() * 10;
+      _nextEventRelativeTime = "+" + displayMinutes.toString() + "M";
       return;
     }
 
