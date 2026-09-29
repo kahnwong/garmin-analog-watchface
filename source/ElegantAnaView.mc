@@ -176,11 +176,11 @@ class ElegantAnaView extends WatchUi.WatchFace {
       _data.getDateDayOfWeek(),
       _data.getDateDayOfMonth()
     );
-    _widgetRenderer.drawPressureTrend(
-      targetDc,
-      Gfx.COLOR_WHITE,
-      _data.getPressureTrend()
-    );
+    // _widgetRenderer.drawPressureTrend(
+    //   targetDc,
+    //   Gfx.COLOR_WHITE,
+    //   _data.getPressureTrend()
+    // );
     _widgetRenderer.drawRecoveryTime(
       targetDc,
       Gfx.COLOR_WHITE,

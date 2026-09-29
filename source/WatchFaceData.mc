@@ -49,7 +49,7 @@ class WatchFaceData {
     refreshDawnDusk(nowValue);
     refreshDate();
     refreshAlternateTime(nowValue);
-    refreshPressureTrend(nowValue);
+    // refreshPressureTrend(nowValue);
   }
 
   public function getBodyBatteryValue() {
