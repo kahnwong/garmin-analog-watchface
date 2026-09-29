@@ -186,6 +186,11 @@ class ElegantAnaView extends WatchUi.WatchFace {
       Gfx.COLOR_WHITE,
       _data.getRecoveryTime()
     );
+    _widgetRenderer.drawRainProbability(
+      targetDc,
+      Gfx.COLOR_WHITE,
+      _data.getRainProbability()
+    );
     _dialRenderer.drawDawnDusk(
       targetDc,
       _data.getDawnDuskInfo(),

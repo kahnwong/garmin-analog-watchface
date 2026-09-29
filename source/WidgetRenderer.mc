@@ -148,6 +148,23 @@ class WidgetRenderer {
     );
   }
 
+  public function drawRainProbability(dc, textColor, value) as Void {
+    var x = (_width * 0.22).toNumber();
+    var y = (_height * 0.66).toNumber();
+
+    dc.setColor(textColor, Gfx.COLOR_TRANSPARENT);
+    // A pointed top and rounded base form a compact droplet icon.
+    dc.fillPolygon([[x, y], [x - 5, y + 9], [x + 5, y + 9]]);
+    dc.fillCircle(x, y + 9, 5);
+    dc.drawText(
+      x,
+      y + 14,
+      Gfx.FONT_SYSTEM_XTINY,
+      value,
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
+  }
+
   private function drawMetricRow(dc, textColor, y, icon, value) as Void {
     dc.setColor(textColor, Gfx.COLOR_BLACK);
     dc.drawText(

@@ -18,6 +18,7 @@ class WatchFaceData {
   private const PRESSURE_HISTORY_SECONDS = 10800;
   private const PRESSURE_MIN_SAMPLES = 10;
   private const PRESSURE_MIN_HOURS = 2.0;
+  private const RAIN_REFRESH_SECONDS = 600;
 
   private var _bodyBatteryRefreshMinute = null;
   private var _bodyBatteryValue = "--";
@@ -38,6 +39,8 @@ class WatchFaceData {
   private var _alternateTime = null;
   private var _pressureRefreshAt = 0;
   private var _pressureTrend = "--";
+  private var _rainRefreshAt = 0;
+  private var _rainProbability = "--";
 
   public function initialize() {}
 
@@ -50,6 +53,7 @@ class WatchFaceData {
     refreshDate();
     refreshAlternateTime(nowValue);
     // refreshPressureTrend(nowValue);
+    refreshRainProbability(nowValue);
   }
 
   public function getBodyBatteryValue() {
@@ -94,6 +98,35 @@ class WatchFaceData {
 
   public function getPressureTrend() {
     return _pressureTrend;
+  }
+
+  public function getRainProbability() {
+    return _rainProbability;
+  }
+
+  private function refreshRainProbability(nowValue) as Void {
+    if (nowValue < _rainRefreshAt) {
+      return;
+    }
+
+    _rainRefreshAt = nowValue + RAIN_REFRESH_SECONDS;
+    _rainProbability = "--";
+    if (!(Toybox has :Weather) || !(Weather has :getCurrentConditions)) {
+      return;
+    }
+
+    try {
+      var conditions = Weather.getCurrentConditions();
+      if (
+        conditions != null &&
+        conditions has :precipitationChance &&
+        conditions.precipitationChance != null
+      ) {
+        _rainProbability = conditions.precipitationChance.toString() + "%";
+      }
+    } catch (ex) {
+      _rainProbability = "--";
+    }
   }
 
   // Heart rate intentionally remains live rather than using a cache.
