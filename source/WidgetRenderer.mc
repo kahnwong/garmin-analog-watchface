@@ -16,6 +16,10 @@ class WidgetRenderer {
   private var _monospaceFont;
   private var _pokemonFont;
   private var _materialDesignFont;
+  private var _barometerBuffer as BufferedBitmap?;
+  private var _barometerSamples = null;
+  private var _barometerColor = null;
+  private var _barometerCacheUnavailable = false;
 
   public function initialize(
     width,
@@ -153,6 +157,46 @@ class WidgetRenderer {
     var y = (_height * 0.69).toNumber();
     var width = (_width * 0.20).toNumber();
     var height = (_height * 0.12).toNumber();
+
+    if (!_barometerCacheUnavailable &&
+        (_barometerBuffer == null || _barometerColor != textColor)) {
+      try {
+        var options = {
+          :width => width + 1,
+          :height => height + 1,
+          :palette => [Gfx.COLOR_BLACK, textColor],
+        };
+        if (Graphics has :createBufferedBitmap) {
+          _barometerBuffer = Graphics.createBufferedBitmap(options).get() as BufferedBitmap;
+        } else if (Graphics has :BufferedBitmap) {
+          _barometerBuffer = new Graphics.BufferedBitmap(options);
+        }
+        _barometerSamples = null;
+      } catch (ex) {
+        _barometerBuffer = null;
+      }
+      _barometerCacheUnavailable = _barometerBuffer == null;
+    }
+
+    if (_barometerBuffer != null) {
+      // Data replaces its sample array only on refresh. Layout recreates this renderer.
+      if (_barometerSamples != samples || _barometerColor != textColor) {
+        var chartDc = _barometerBuffer.getDc();
+        // Monochrome bitmap palettes need real colors; transparency can
+        // map to white and turn the entire cached chart into a rectangle.
+        chartDc.setColor(textColor, Gfx.COLOR_BLACK);
+        chartDc.clear();
+        renderBarometerChart(chartDc, textColor, samples, 0, 0, width, height, x + y);
+        _barometerSamples = samples;
+        _barometerColor = textColor;
+      }
+      dc.drawBitmap(x, y, _barometerBuffer);
+    } else {
+      renderBarometerChart(dc, textColor, samples, x, y, width, height, 0);
+    }
+  }
+
+  private function renderBarometerChart(dc, textColor, samples, x, y, width, height, patternOffset) as Void {
     var minimum = null;
     var maximum = null;
     for (var i = 0; i < samples.size(); i += 1) {
@@ -196,10 +240,12 @@ class WidgetRenderer {
             topY = (previousY + (pointY - previousY) *
               (fillX - previousX) / (pointX - previousX).toFloat()).toNumber();
           }
-          for (var fillY = topY + 1; fillY < y + height; fillY += 1) {
-            if ((fillX + fillY) % 2 == 0) {
-              dc.drawPoint(fillX, fillY);
-            }
+          var firstY = topY + 1;
+          if ((fillX + firstY + patternOffset) % 2 != 0) {
+            firstY += 1;
+          }
+          for (var fillY = firstY; fillY < y + height; fillY += 2) {
+            dc.drawPoint(fillX, fillY);
           }
         }
         if (previousX != null) {

@@ -156,7 +156,7 @@ class ElegantAnaView extends WatchUi.WatchFace {
     targetDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
     var lowerLeftWidget = Application.Properties.getValue("LowerLeftWidget");
-    _data.refresh(nowValue, lowerLeftWidget == 1 || lowerLeftWidget == 2);
+    _data.refresh(nowValue, lowerLeftWidget);
     _widgetRenderer.drawHeartRate(
       targetDc,
       Gfx.COLOR_WHITE,

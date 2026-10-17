@@ -40,13 +40,13 @@ class WatchFaceData {
   private var _pressureRefreshAt = 0;
   private var _pressureTrend = "--";
   private var _pressureChart = new [36];
-  private var _pressureValue = "--";
+  private var _pressureMode = null;
   private var _rainRefreshAt = 0;
   private var _rainProbability = "--";
 
   public function initialize() {}
 
-  public function refresh(nowValue, showPressureTrend) as Void {
+  public function refresh(nowValue, lowerLeftWidget) as Void {
     refreshBodyBattery(nowValue);
     refreshNextEvent(nowValue);
     refreshNextEventRelativeTime(nowValue);
@@ -54,8 +54,8 @@ class WatchFaceData {
     refreshDawnDusk(nowValue);
     refreshDate();
     refreshAlternateTime(nowValue);
-    if (showPressureTrend) {
-      refreshPressureTrend(nowValue);
+    if (lowerLeftWidget == 1 || lowerLeftWidget == 2) {
+      refreshPressure(nowValue, lowerLeftWidget);
     } else {
       refreshRainProbability(nowValue);
     }
@@ -103,10 +103,6 @@ class WatchFaceData {
 
   public function getPressureChart() {
     return _pressureChart;
-  }
-
-  public function getPressureValue() {
-    return _pressureValue;
   }
 
   public function getPressureTrend() {
@@ -433,15 +429,18 @@ class WatchFaceData {
     _alternateRefreshMinute = refreshMinute;
   }
 
-  private function refreshPressureTrend(nowValue) as Void {
-    if (nowValue < _pressureRefreshAt) {
+  private function refreshPressure(nowValue, mode) as Void {
+    if (mode == _pressureMode && nowValue < _pressureRefreshAt) {
       return;
     }
 
     _pressureRefreshAt = nowValue + PRESSURE_REFRESH_SECONDS;
+    _pressureMode = mode;
     _pressureTrend = "--";
-    _pressureChart = new [36];
-    _pressureValue = "--";
+    if (mode == 2) {
+      // Replacing the array also invalidates the renderer's cached bitmap.
+      _pressureChart = new [36];
+    }
     if (
       !(Toybox has :SensorHistory) ||
       !(Toybox.SensorHistory has :getPressureHistory)
@@ -466,31 +465,32 @@ class WatchFaceData {
       while (sample != null) {
         if (sample.data != null) {
           var timestamp = sample.when.value();
-          if (firstTimestamp == null) {
-            firstTimestamp = timestamp;
-          }
-
-          var hours = (timestamp - firstTimestamp) / 3600.0;
           var pressure = sample.data / 100.0;
-          var bucket = ((timestamp - (nowValue - PRESSURE_HISTORY_SECONDS)) / 300.0).toNumber();
-          if (timestamp >= nowValue - PRESSURE_HISTORY_SECONDS && timestamp <= nowValue) {
-            if (bucket >= _pressureChart.size()) {
-              bucket = _pressureChart.size() - 1;
+          if (mode == 2) {
+            if (timestamp >= nowValue - PRESSURE_HISTORY_SECONDS && timestamp <= nowValue) {
+              var bucket = ((timestamp - (nowValue - PRESSURE_HISTORY_SECONDS)) / 300.0).toNumber();
+              if (bucket >= _pressureChart.size()) {
+                bucket = _pressureChart.size() - 1;
+              }
+              _pressureChart[bucket] = pressure;
             }
-            _pressureChart[bucket] = pressure;
-            _pressureValue = pressure.format("%.0f");
+          } else {
+            if (firstTimestamp == null) {
+              firstTimestamp = timestamp;
+            }
+            var hours = (timestamp - firstTimestamp) / 3600.0;
+            count += 1;
+            spanHours = hours;
+            sumX += hours;
+            sumY += pressure;
+            sumXX += hours * hours;
+            sumXY += hours * pressure;
           }
-          count += 1;
-          spanHours = hours;
-          sumX += hours;
-          sumY += pressure;
-          sumXX += hours * hours;
-          sumXY += hours * pressure;
         }
         sample = iterator.next();
       }
 
-      if (count < PRESSURE_MIN_SAMPLES || spanHours < PRESSURE_MIN_HOURS) {
+      if (mode == 2 || count < PRESSURE_MIN_SAMPLES || spanHours < PRESSURE_MIN_HOURS) {
         return;
       }
 
