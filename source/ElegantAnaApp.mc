@@ -19,6 +19,14 @@ class ElegantAnaWatch extends Application.AppBase {
 
   public function onStop(state as Dictionary?) as Void {}
 
+  public function onSettingsChanged() as Void {
+    WatchUi.requestUpdate();
+  }
+
+  public function getSettingsView() as [Views] or [Views, InputDelegates] or Null {
+    return [new WatchFaceSettingsMenu(), new WatchFaceSettingsMenuDelegate()];
+  }
+
   public function getInitialView() as [Views] or [Views, InputDelegates] {
     if (WatchUi has :WatchFaceDelegate) {
       var view = new $.ElegantAnaView();

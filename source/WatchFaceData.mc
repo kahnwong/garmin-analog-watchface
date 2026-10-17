@@ -44,7 +44,7 @@ class WatchFaceData {
 
   public function initialize() {}
 
-  public function refresh(nowValue) as Void {
+  public function refresh(nowValue, showPressureTrend) as Void {
     refreshBodyBattery(nowValue);
     refreshNextEvent(nowValue);
     refreshNextEventRelativeTime(nowValue);
@@ -52,8 +52,11 @@ class WatchFaceData {
     refreshDawnDusk(nowValue);
     refreshDate();
     refreshAlternateTime(nowValue);
-    // refreshPressureTrend(nowValue);
-    refreshRainProbability(nowValue);
+    if (showPressureTrend) {
+      refreshPressureTrend(nowValue);
+    } else {
+      refreshRainProbability(nowValue);
+    }
   }
 
   public function getBodyBatteryValue() {

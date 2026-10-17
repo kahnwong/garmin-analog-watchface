@@ -4,6 +4,7 @@
 // Application Developer Agreement.
 //
 
+import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Math;
 import Toybox.System;
@@ -154,7 +155,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
     targetDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-    _data.refresh(nowValue);
+    var showPressureTrend = Application.Properties.getValue("LowerLeftWidget") == 1;
+    _data.refresh(nowValue, showPressureTrend);
     _widgetRenderer.drawHeartRate(
       targetDc,
       Gfx.COLOR_WHITE,
@@ -176,21 +178,24 @@ class ElegantAnaView extends WatchUi.WatchFace {
       _data.getDateDayOfWeek(),
       _data.getDateDayOfMonth()
     );
-    // _widgetRenderer.drawPressureTrend(
-    //   targetDc,
-    //   Gfx.COLOR_WHITE,
-    //   _data.getPressureTrend()
-    // );
     _widgetRenderer.drawRecoveryTime(
       targetDc,
       Gfx.COLOR_WHITE,
       _data.getRecoveryTime()
     );
-    _widgetRenderer.drawRainProbability(
-      targetDc,
-      Gfx.COLOR_WHITE,
-      _data.getRainProbability()
-    );
+    if (showPressureTrend) {
+      _widgetRenderer.drawPressureTrend(
+        targetDc,
+        Gfx.COLOR_WHITE,
+        _data.getPressureTrend()
+      );
+    } else {
+      _widgetRenderer.drawRainProbability(
+        targetDc,
+        Gfx.COLOR_WHITE,
+        _data.getRainProbability()
+      );
+    }
     _dialRenderer.drawDawnDusk(
       targetDc,
       _data.getDawnDuskInfo(),
