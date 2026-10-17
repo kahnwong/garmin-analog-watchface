@@ -39,6 +39,8 @@ class WatchFaceData {
   private var _alternateTime = null;
   private var _pressureRefreshAt = 0;
   private var _pressureTrend = "--";
+  private var _pressureChart = new [36];
+  private var _pressureValue = "--";
   private var _rainRefreshAt = 0;
   private var _rainProbability = "--";
 
@@ -97,6 +99,14 @@ class WatchFaceData {
 
   public function getAlternateTime() {
     return _alternateTime;
+  }
+
+  public function getPressureChart() {
+    return _pressureChart;
+  }
+
+  public function getPressureValue() {
+    return _pressureValue;
   }
 
   public function getPressureTrend() {
@@ -429,6 +439,9 @@ class WatchFaceData {
     }
 
     _pressureRefreshAt = nowValue + PRESSURE_REFRESH_SECONDS;
+    _pressureTrend = "--";
+    _pressureChart = new [36];
+    _pressureValue = "--";
     if (
       !(Toybox has :SensorHistory) ||
       !(Toybox.SensorHistory has :getPressureHistory)
@@ -459,6 +472,14 @@ class WatchFaceData {
 
           var hours = (timestamp - firstTimestamp) / 3600.0;
           var pressure = sample.data / 100.0;
+          var bucket = ((timestamp - (nowValue - PRESSURE_HISTORY_SECONDS)) / 300.0).toNumber();
+          if (timestamp >= nowValue - PRESSURE_HISTORY_SECONDS && timestamp <= nowValue) {
+            if (bucket >= _pressureChart.size()) {
+              bucket = _pressureChart.size() - 1;
+            }
+            _pressureChart[bucket] = pressure;
+            _pressureValue = pressure.format("%.0f");
+          }
           count += 1;
           spanHours = hours;
           sumX += hours;

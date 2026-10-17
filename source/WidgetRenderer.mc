@@ -148,6 +148,71 @@ class WidgetRenderer {
     );
   }
 
+  public function drawBarometerChart(dc, textColor, samples) as Void {
+    var x = (_width * 0.12).toNumber();
+    var y = (_height * 0.69).toNumber();
+    var width = (_width * 0.20).toNumber();
+    var height = (_height * 0.12).toNumber();
+    var minimum = null;
+    var maximum = null;
+    for (var i = 0; i < samples.size(); i += 1) {
+      var pressure = samples[i];
+      if (pressure != null) {
+        if (minimum == null || pressure < minimum) {
+          minimum = pressure;
+        }
+        if (maximum == null || pressure > maximum) {
+          maximum = pressure;
+        }
+      }
+    }
+
+    dc.setColor(textColor, Gfx.COLOR_TRANSPARENT);
+    dc.setPenWidth(1);
+    dc.drawLine(x, y + height, x + width, y + height);
+    if (minimum != null) {
+      // Keep flat readings centered and avoid exaggerating tiny changes.
+      var range = maximum - minimum;
+      if (range < 1.0) {
+        minimum -= (1.0 - range) / 2.0;
+        range = 1.0;
+      }
+      var previousX = null;
+      var previousY = null;
+      for (var i = 0; i < samples.size(); i += 1) {
+        if (samples[i] == null) {
+          previousX = null;
+          previousY = null;
+          continue;
+        }
+        var pointX = x + (i * width / (samples.size() - 1)).toNumber();
+        var pointY = y + height - 2 - ((samples[i] - minimum) / range * (height - 4)).toNumber();
+        dc.setColor(textColor, Gfx.COLOR_TRANSPARENT);
+        // One-pixel checkerboard provides a 50% fill on monochrome displays.
+        var startX = previousX != null ? previousX : pointX;
+        for (var fillX = startX; fillX <= pointX; fillX += 1) {
+          var topY = pointY;
+          if (previousX != null && pointX > previousX) {
+            topY = (previousY + (pointY - previousY) *
+              (fillX - previousX) / (pointX - previousX).toFloat()).toNumber();
+          }
+          for (var fillY = topY + 1; fillY < y + height; fillY += 1) {
+            if ((fillX + fillY) % 2 == 0) {
+              dc.drawPoint(fillX, fillY);
+            }
+          }
+        }
+        if (previousX != null) {
+          dc.drawLine(previousX, previousY, pointX, pointY);
+        } else {
+          dc.drawPoint(pointX, pointY);
+        }
+        previousX = pointX;
+        previousY = pointY;
+      }
+    }
+  }
+
   public function drawRainProbability(dc, textColor, value) as Void {
     var x = (_width * 0.22).toNumber();
     var y = (_height * 0.66).toNumber();

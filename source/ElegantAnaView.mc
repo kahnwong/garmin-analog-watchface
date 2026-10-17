@@ -155,8 +155,8 @@ class ElegantAnaView extends WatchUi.WatchFace {
     }
     targetDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-    var showPressureTrend = Application.Properties.getValue("LowerLeftWidget") == 1;
-    _data.refresh(nowValue, showPressureTrend);
+    var lowerLeftWidget = Application.Properties.getValue("LowerLeftWidget");
+    _data.refresh(nowValue, lowerLeftWidget == 1 || lowerLeftWidget == 2);
     _widgetRenderer.drawHeartRate(
       targetDc,
       Gfx.COLOR_WHITE,
@@ -183,7 +183,13 @@ class ElegantAnaView extends WatchUi.WatchFace {
       Gfx.COLOR_WHITE,
       _data.getRecoveryTime()
     );
-    if (showPressureTrend) {
+    if (lowerLeftWidget == 2) {
+      _widgetRenderer.drawBarometerChart(
+        targetDc,
+        Gfx.COLOR_WHITE,
+        _data.getPressureChart()
+      );
+    } else if (lowerLeftWidget == 1) {
       _widgetRenderer.drawPressureTrend(
         targetDc,
         Gfx.COLOR_WHITE,
