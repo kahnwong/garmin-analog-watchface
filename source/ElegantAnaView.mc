@@ -183,19 +183,19 @@ class ElegantAnaView extends WatchUi.WatchFace {
       Gfx.COLOR_WHITE,
       _data.getRecoveryTime()
     );
-    if (lowerLeftWidget == 2) {
+    if (lowerLeftWidget == 3) {
       _widgetRenderer.drawBarometerChart(
         targetDc,
         Gfx.COLOR_WHITE,
         _data.getPressureChart()
       );
-    } else if (lowerLeftWidget == 1) {
+    } else if (lowerLeftWidget == 2) {
       _widgetRenderer.drawPressureTrend(
         targetDc,
         Gfx.COLOR_WHITE,
         _data.getPressureTrend()
       );
-    } else {
+    } else if (lowerLeftWidget == 1) {
       _widgetRenderer.drawRainProbability(
         targetDc,
         Gfx.COLOR_WHITE,

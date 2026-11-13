@@ -54,9 +54,9 @@ class WatchFaceData {
     refreshDawnDusk(nowValue);
     refreshDate();
     refreshAlternateTime(nowValue);
-    if (lowerLeftWidget == 1 || lowerLeftWidget == 2) {
+    if (lowerLeftWidget == 2 || lowerLeftWidget == 3) {
       refreshPressure(nowValue, lowerLeftWidget);
-    } else {
+    } else if (lowerLeftWidget == 1) {
       refreshRainProbability(nowValue);
     }
   }
@@ -437,7 +437,7 @@ class WatchFaceData {
     _pressureRefreshAt = nowValue + PRESSURE_REFRESH_SECONDS;
     _pressureMode = mode;
     _pressureTrend = "--";
-    if (mode == 2) {
+    if (mode == 3) {
       // Replacing the array also invalidates the renderer's cached bitmap.
       _pressureChart = new [36];
     }
@@ -466,7 +466,7 @@ class WatchFaceData {
         if (sample.data != null) {
           var timestamp = sample.when.value();
           var pressure = sample.data / 100.0;
-          if (mode == 2) {
+          if (mode == 3) {
             if (timestamp >= nowValue - PRESSURE_HISTORY_SECONDS && timestamp <= nowValue) {
               var bucket = ((timestamp - (nowValue - PRESSURE_HISTORY_SECONDS)) / 300.0).toNumber();
               if (bucket >= _pressureChart.size()) {
@@ -490,7 +490,7 @@ class WatchFaceData {
         sample = iterator.next();
       }
 
-      if (mode == 2 || count < PRESSURE_MIN_SAMPLES || spanHours < PRESSURE_MIN_HOURS) {
+      if (mode == 3 || count < PRESSURE_MIN_SAMPLES || spanHours < PRESSURE_MIN_HOURS) {
         return;
       }
 

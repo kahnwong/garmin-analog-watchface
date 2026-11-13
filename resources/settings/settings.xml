@@ -1,9 +1,10 @@
 <settings>
     <setting propertyKey="@Properties.LowerLeftWidget" title="@Strings.LowerLeftWidgetTitle">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.RainProbabilityLabel</listEntry>
-            <listEntry value="1">@Strings.PressureTrendLabel</listEntry>
-            <listEntry value="2">@Strings.BarometerChartLabel</listEntry>
+            <listEntry value="0">@Strings.NoneLabel</listEntry>
+            <listEntry value="1">@Strings.RainProbabilityLabel</listEntry>
+            <listEntry value="2">@Strings.PressureTrendLabel</listEntry>
+            <listEntry value="3">@Strings.BarometerChartLabel</listEntry>
         </settingConfig>
     </setting>
 </settings>

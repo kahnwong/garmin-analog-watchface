@@ -27,11 +27,12 @@ class WatchFaceSettingsMenuDelegate extends WatchUi.Menu2InputDelegate {
 class LowerLeftWidgetMenu extends WatchUi.Menu2 {
   public function initialize() {
     Menu2.initialize({ :title => Rez.Strings.LowerLeftMenuTitle });
-    addItem(new WatchUi.MenuItem(Rez.Strings.RainProbabilityLabel, null, 0, null));
-    addItem(new WatchUi.MenuItem(Rez.Strings.PressureTrendLabel, null, 1, null));
-    addItem(new WatchUi.MenuItem(Rez.Strings.BarometerChartLabel, null, 2, null));
+    addItem(new WatchUi.MenuItem(Rez.Strings.NoneLabel, null, 0, null));
+    addItem(new WatchUi.MenuItem(Rez.Strings.RainProbabilityLabel, null, 1, null));
+    addItem(new WatchUi.MenuItem(Rez.Strings.PressureTrendLabel, null, 2, null));
+    addItem(new WatchUi.MenuItem(Rez.Strings.BarometerChartLabel, null, 3, null));
     var selected = Application.Properties.getValue("LowerLeftWidget");
-    setFocus(selected == 2 ? 2 : (selected == 1 ? 1 : 0));
+    setFocus(selected == 3 ? 3 : (selected == 2 ? 2 : (selected == 1 ? 1 : 0)));
   }
 }
 

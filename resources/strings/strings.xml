@@ -3,6 +3,7 @@
     <string id="LowerLeftWidgetTitle">Lower-left widget</string>
     <string id="SettingsTitle">Settings</string>
     <string id="LowerLeftMenuTitle">Lower left</string>
+    <string id="NoneLabel">None</string>
     <string id="RainProbabilityLabel">Rain probability</string>
     <string id="PressureTrendLabel">Pressure trend</string>
     <string id="BarometerChartLabel">Barometer chart</string>
